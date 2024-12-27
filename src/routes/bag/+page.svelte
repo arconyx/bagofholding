@@ -6,7 +6,7 @@
 
 <h1 class="text-xl">Bag of Holding</h1>
 
-<ul class="grid-cols-auto-fill-48 grid grid-flow-row auto-rows-max" style="">
+<ul class="grid-cols-auto-fill-48 grid grid-flow-row auto-rows-min" style="">
 	{#each data.items as item}
 		<ItemBox {item} />
 	{/each}
