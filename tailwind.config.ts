@@ -6,7 +6,12 @@ export default {
 	content: ['./src/**/*.{html,js,svelte,ts}'],
 
 	theme: {
-		extend: {}
+		extend: {
+			gridTemplateColumns: {
+				'auto-fill-48': 'repeat(auto-fill, minmax(12rem, 1fr))',
+				'auto-fit-48': 'repeat(auto-fit, minmax(12rem, 1fr))',
+			},
+		}
 	},
 
 	plugins: [forms, containerQueries]
