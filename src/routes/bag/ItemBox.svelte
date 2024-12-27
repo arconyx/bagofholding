@@ -8,7 +8,7 @@
 	let { item }: Props = $props();
 </script>
 
-<li data-item-id={item.id}>
+<li data-item-id={item.id} class="m-4 block min-w-48">
 	<h3 class="text-lg">{item.name}</h3>
 	<p>{item.notes}</p>
 	<div class="flex flex-row">
