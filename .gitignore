@@ -23,5 +23,6 @@ Thumbs.db
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-# vscode
+# dev env
 *.code-workspace
+.direnv/
