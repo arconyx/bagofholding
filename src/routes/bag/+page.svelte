@@ -1,11 +1,13 @@
 <script lang="ts">
+	import ItemBox from './ItemBox.svelte';
+
 	let { data } = $props();
 </script>
 
-<h1>Bag of Holding</h1>
+<h1 class="text-xl">Bag of Holding</h1>
 
 <ul>
-	{#each data.items as { name }}
-		<li>{name}</li>
+	{#each data.items as item}
+		<ItemBox {item} />
 	{/each}
 </ul>
