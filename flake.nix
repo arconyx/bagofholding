@@ -11,6 +11,7 @@
       in {
         devShell = pkgs.mkShell {
           buildInputs=[
+	     pkgs.bashInteractive
 	     pkgs.nodejs_23
             pkgs.nodePackages.pnpm
             pkgs.nodePackages.typescript
