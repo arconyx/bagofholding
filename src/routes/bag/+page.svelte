@@ -4,7 +4,7 @@
 	let { data } = $props();
 </script>
 
-<h1 class="text-xl">Bag of Holding</h1>
+<h1 class="ml-2 mt-2 text-xl">Bag of Holding</h1>
 
 <ul class="grid-cols-auto-fill-48 grid grid-flow-row auto-rows-min" style="">
 	{#each data.items as item}
