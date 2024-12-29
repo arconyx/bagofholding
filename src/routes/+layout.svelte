@@ -1,5 +1,7 @@
 <script lang="ts">
 	import '../app.css';
+	import { base } from '$app/paths';
+
 	let { children, data } = $props();
 	const { supabase, loggedIn } = data;
 
@@ -21,11 +23,11 @@
 </script>
 
 <nav class="auto flex flex-row pb-2 pl-4 pr-4 pt-2">
-	<a href="/collections" class="flex-grow">Collections</a>
+	<a href="{base}/collections" class="flex-grow">Collections</a>
 	{#if hasCurrentSession}
-		<a href="/auth/logout">Logout</a>
+		<a href="{base}/auth/logout">Logout</a>
 	{:else}
-		<a href="/auth/login">Login</a>
+		<a href="{base}/auth/login">Login</a>
 	{/if}
 </nav>
 <hr class="mb-4 ml-2 mr-2" />

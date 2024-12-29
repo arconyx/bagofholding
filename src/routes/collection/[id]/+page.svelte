@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import type { FilledBag } from '$lib/schema/FilledBag';
 	import ItemList from './ItemList.svelte';
 
@@ -23,7 +24,9 @@
 			<p class="text-md">{bag.description}</p>
 			<a
 				class="text-sm"
-				href="/bag/{bag.id}/items/new?redir={encodeURIComponent('/collection/' + collection.id)}"
+				href="{base}/bag/{bag.id}/items/new?redir={encodeURIComponent(
+					'/collection/' + collection.id
+				)}"
 			>
 				Add Item
 			</a>
