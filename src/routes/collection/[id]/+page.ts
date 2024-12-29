@@ -42,7 +42,6 @@ export const load: PageLoad = async ({ parent, params }) => {
     }
 
     const getItems = (bag: { id: string }) => { return getBagItems(supabase, bag) }
-    const items = await Promise.all(bags.map(getItems))
 
     const filledBags: FilledBag[] = new Array()
 
@@ -58,5 +57,5 @@ export const load: PageLoad = async ({ parent, params }) => {
     }
 
     console.log("Loaded collection", collection, filledBags)
-    return { supabase, collection, filledBags }
+    return { collection, filledBags }
 };
