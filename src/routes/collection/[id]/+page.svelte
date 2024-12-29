@@ -13,7 +13,6 @@
 </script>
 
 <h1 class="text-xl">{collection.name}</h1>
-1
 <p class="text-md mb-4">{collection.description}</p>
 <a href="{collection.id}/bags/new">Add Bag</a>
 
