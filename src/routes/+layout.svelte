@@ -22,7 +22,7 @@
 
 <nav class="auto flex flex-row pb-2 pl-4 pr-4 pt-2">
 	<a href="/collections" class="flex-grow">Collections</a>
-	{#if loggedIn}
+	{#if hasCurrentSession}
 		<a href="/auth/logout">Logout</a>
 	{:else}
 		<a href="/auth/login">Login</a>
