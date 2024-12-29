@@ -43,7 +43,7 @@ jobs:
 
   deploy:
     needs: build_site
-    runs-on: ubuntu-late  st
+    runs-on: ubuntu-latest
 
     permissions:
       pages: write
