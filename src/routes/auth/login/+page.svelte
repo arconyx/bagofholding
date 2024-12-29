@@ -1,12 +1,17 @@
 <script lang="ts">
-	import type { SupabaseClient } from '@supabase/supabase-js';
+	import { page } from '$app/state';
+
+	const origin = page.url.origin;
 
 	let { data } = $props();
 	const supabase = data.supabase;
 
 	async function signInWithDiscord() {
 		const { data, error } = await supabase.auth.signInWithOAuth({
-			provider: 'discord'
+			provider: 'discord',
+			options: {
+				redirectTo: `${origin}/collections`
+			}
 		});
 		return;
 	}
