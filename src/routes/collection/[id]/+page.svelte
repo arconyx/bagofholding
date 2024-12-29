@@ -7,11 +7,10 @@
 </script>
 
 <h1 class="text-xl">{collection.name}</h1>
-<p class="text-md">{collection.description}</p>
-<br />
+<p class="text-md pb-4">{collection.description}</p>
 <a href="{page.params.id}/bag/new">Add Bag</a>
-<br />
-<ul>
+
+<ul class="pt-4">
 	{#each filledBags as bag}
 		<li>
 			<h2 class="text-lg">{bag.name}</h2>

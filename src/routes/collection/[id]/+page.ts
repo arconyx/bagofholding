@@ -47,13 +47,16 @@ export const load: PageLoad = async ({ parent, params }) => {
     const filledBags: FilledBag[] = new Array()
 
     for await (let items of bags.map(getItems)) {
-        let bag = bags.find(i => { i.id == items.bag_id }) ?? null
-        if (bag == null) { continue }
+        let bag = bags.find(({ id }) => { return id == items.bag_id }) ?? null
+        if (bag == null) {
+            console.error("Bag not found", items, bags)
+            continue
+        }
         let fbag = bag as FilledBag
         fbag['items'] = items.items
         filledBags.push(fbag)
     }
 
-    console.log("Loaded collection", collection)
+    console.log("Loaded collection", collection, filledBags)
     return { supabase, collection, filledBags }
 };
