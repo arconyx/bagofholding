@@ -6,7 +6,9 @@
 
 <ul class="pb-4 pt-4 text-lg">
 	{#each data.collections as collection}
-		<a href="../collection/{collection.id}">{collection.name}</a>
+		<li>
+			<a href="../collection/{collection.id}">{collection.name}</a>
+		</li>
 	{/each}
 </ul>
 
