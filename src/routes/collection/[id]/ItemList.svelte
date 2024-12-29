@@ -10,7 +10,7 @@
 </script>
 
 <ul class="grid grid-flow-row auto-rows-min grid-cols-auto-fill-48" style="">
-	{#each data.items as item}
+	{#each items as item}
 		<ItemBox {item} />
 	{/each}
 </ul>
