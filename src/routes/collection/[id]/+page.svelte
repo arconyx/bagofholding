@@ -1,5 +1,6 @@
 <script lang="ts">
 	import ItemList from './ItemList.svelte';
+	import { page } from '$app/state';
 
 	let { data } = $props();
 	const { supabase, collection, filledBags } = data;
@@ -7,6 +8,8 @@
 
 <h1 class="text-xl">{collection.name}</h1>
 <p class="text-md">{collection.description}</p>
+<br />
+<a href="{page.params.id}/bag/new">Add Bag</a>
 <br />
 <ul>
 	{#each filledBags as bag}
