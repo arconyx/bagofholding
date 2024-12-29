@@ -42,7 +42,7 @@ export type Database = {
           description: string | null
           id: string
           name: string
-          updated_at: string | null
+          updated_at: string
         }
         Insert: {
           capacity: number
@@ -51,7 +51,7 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
-          updated_at?: string | null
+          updated_at?: string
         }
         Update: {
           capacity?: number
@@ -60,7 +60,7 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
-          updated_at?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
@@ -109,7 +109,7 @@ export type Database = {
           quantity: number
           type: Database["public"]["Enums"]["item_type"]
           unit_bulk: number
-          updated_at: string | null
+          updated_at: string
         }
         Insert: {
           bag_id: string
@@ -120,7 +120,7 @@ export type Database = {
           quantity?: number
           type?: Database["public"]["Enums"]["item_type"]
           unit_bulk?: number
-          updated_at?: string | null
+          updated_at?: string
         }
         Update: {
           bag_id?: string
@@ -131,7 +131,7 @@ export type Database = {
           quantity?: number
           type?: Database["public"]["Enums"]["item_type"]
           unit_bulk?: number
-          updated_at?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
@@ -153,7 +153,7 @@ export type Database = {
         Insert: {
           collection_id: string
           created_at?: string
-          updated_at: string
+          updated_at?: string
           user_id: string
         }
         Update: {
