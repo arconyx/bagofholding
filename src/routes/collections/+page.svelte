@@ -4,9 +4,9 @@
 
 <h1 class="text-xl">Collections</h1>
 
-<ul>
+<ul class="pb-4 pt-4 text-lg">
 	{#each data.collections as collection}
-		<h3>{collection.name}</h3>
+		<a href="/collection/{collection.id}">{collection.name}</a>
 	{/each}
 </ul>
 
