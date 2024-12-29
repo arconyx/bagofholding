@@ -24,7 +24,7 @@
 			<a
 				class="text-sm"
 				href="{base}/bag/{bag.id}/items/new?redir={encodeURIComponent(
-					'/collection/' + collection.id
+					base + '/collection/' + collection.id
 				)}"
 			>
 				Add Item
