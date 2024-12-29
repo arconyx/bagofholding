@@ -1,7 +1,7 @@
 import type { PageLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 
-export const ssr = true; // needs to be false for vite dev
+export const ssr = false; // needs to be false for vite dev
 
 export const load: PageLoad = async ({ parent, params }) => {
     console.log("Running load")

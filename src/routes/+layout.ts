@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { LayoutLoad } from "./$types";
 import type { Database } from "$lib/supabase";
 
-export const prerender = true;
+export const prerender = 'auto';
 
 const supabase = createClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_KEY)
 
