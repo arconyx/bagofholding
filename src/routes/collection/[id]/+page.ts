@@ -7,7 +7,7 @@ import type { FilledBag } from "$lib/schema/FilledBag";
 export const ssr = false; // needs to be false for vite dev
 
 async function getBagItems(supabase: SupabaseClient<Database>, bag: { id: string }) {
-    const { data, error } = await supabase.from("items").select()
+    const { data, error } = await supabase.from("items").select().eq("bag_id", bag.id)
     if (error != null) {
         throw new Error("Unable to load bag for items");
     }
