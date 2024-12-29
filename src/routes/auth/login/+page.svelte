@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { PUBLIC_BASE_PATH } from '$env/static/public';
 	import type { SupabaseClient } from '@supabase/supabase-js';
 
 	let { data } = $props();
@@ -7,10 +6,7 @@
 
 	async function signInWithDiscord() {
 		const { data, error } = await supabase.auth.signInWithOAuth({
-			provider: 'discord',
-			options: {
-				redirectTo: `${PUBLIC_BASE_PATH}/auth/callback`
-			}
+			provider: 'discord'
 		});
 		return;
 	}
