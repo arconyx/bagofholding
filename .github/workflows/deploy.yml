@@ -28,8 +28,11 @@ jobs:
       - name: build
         env:
          BASE_PATH: '/${{ github.event.repository.name }}'
+         PUBLIC_SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL }}
+         PUBLIC_SUPABASE_KEY: ${{ vars.PUBLIC_SUPABASE_KEY }}
         run: |
          pnpm run build
+          
 
       - name: Upload Artifacts
         uses: actions/upload-pages-artifact@v3
