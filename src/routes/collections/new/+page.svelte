@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
 	import { redirect } from '@sveltejs/kit';
 
 	let { data } = $props();
@@ -33,7 +34,7 @@
 			throw new Error('Unable to submit data');
 		}
 
-		await goto('/collections');
+		await goto(base + '/collections');
 
 		return false;
 	}
