@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import type { FilledBag } from '$lib/schema/FilledBag';
-	import ItemList from './ItemList.svelte';
+	import ItemList from '$lib/ItemList.svelte';
 
 	function usedCapacity(bag: FilledBag) {
 		let items = bag.items;
