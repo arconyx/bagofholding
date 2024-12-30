@@ -4,7 +4,7 @@
 	import { userState } from '$lib/state.svelte';
 
 	let { children, data } = $props();
-	const { supabase } = data;
+	const { 
 
 	supabase.auth.onAuthStateChange((event, _session) => {
 		if (event === 'SIGNED_OUT') {
