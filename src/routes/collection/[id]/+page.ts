@@ -15,7 +15,6 @@ async function getBagItems(supabase: SupabaseClient<Database>, bag: { id: string
 export const load: PageLoad = async ({ parent, params }) => {
     console.log("Running load")
     const { supabase, collection } = await parent();
-    console.log("Supabase is", supabase)
 
     const { data: bags, error: bags_error } = await supabase
         .from("bags")
@@ -42,6 +41,5 @@ export const load: PageLoad = async ({ parent, params }) => {
         filledBags.push(fbag)
     }
 
-    console.log("Loaded collection", collection, filledBags)
     return { collection, filledBags }
 };
