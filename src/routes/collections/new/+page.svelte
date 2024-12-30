@@ -2,7 +2,6 @@
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { userState } from '$lib/state.svelte.js';
-	import { redirect } from '@sveltejs/kit';
 
 	let { data } = $props();
 	const supabase = data.supabase;
