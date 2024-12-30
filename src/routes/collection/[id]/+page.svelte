@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import ItemList from '$lib/ItemList.svelte';
+	import { userState } from '$lib/state.svelte.js';
 	import { usedCapacity } from '$lib/utils.js';
 
 	let { data } = $props();
@@ -31,4 +32,8 @@
 	{/each}
 </ul>
 
-<a class="mt-8 block" href="{collection.id}/delete"> Delete Collection </a>
+{#if userState?.user?.id === collection.owner_id}
+	<a class="mt-8 block" href="{collection.id}/delete"> Delete Collection </a>
+{:else}
+	<a class="mt-8 block" href="{collection.id}/members/leave"> Leave Collection </a>
+{/if}
