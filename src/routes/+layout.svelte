@@ -3,7 +3,19 @@
 	import { base } from '$app/paths';
 	import { userState } from '$lib/state.svelte';
 
-	let { children } = $props();
+	let { children, data } = $props();
+	const { supabase } = data;
+
+	supabase.auth.onAuthStateChange((event, session) => {
+		if (event === 'SIGNED_OUT') {
+			// clear local and session storage
+			[window.localStorage, window.sessionStorage].forEach((storage) => {
+				Object.entries(storage).forEach(([key]) => {
+					storage.removeItem(key);
+				});
+			});
+		}
+	});
 </script>
 
 <nav class="auto flex flex-row pb-2 pl-4 pr-4 pt-2">

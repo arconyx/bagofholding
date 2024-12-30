@@ -23,12 +23,6 @@ export const load: LayoutLoad = async () => {
         if (event == 'SIGNED_IN') {
             userState.user = session?.user ?? null
         } else if (event === 'SIGNED_OUT') {
-            // clear local and session storage
-            [window.localStorage, window.sessionStorage].forEach((storage) => {
-                Object.entries(storage).forEach(([key]) => {
-                    storage.removeItem(key);
-                });
-            });
             userState.user = null
         }
     });
