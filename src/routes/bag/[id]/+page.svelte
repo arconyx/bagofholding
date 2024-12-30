@@ -11,5 +11,7 @@
 <a class="pr-4 text-sm" href="{base}/bag/{bag.id}/items/new?redir={encodeURIComponent('../')}">
 	Add Item
 </a>
-<a class="text-sm" href="{base}/collection/{bag.collection_id}">View collection</a>
+<a class="pr-4 text-sm" href="{base}/collection/{bag.collection_id}">View collection</a>
+<a class="pr-4 text-sm" href="{bag.id}/delete">Delete Bag</a>
+
 <ItemList items={bag.items} />
