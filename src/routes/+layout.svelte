@@ -6,7 +6,7 @@
 	let { children, data } = $props();
 	const { supabase } = data;
 
-	supabase.auth.onAuthStateChange((event, session) => {
+	supabase.auth.onAuthStateChange((event, _session) => {
 		if (event === 'SIGNED_OUT') {
 			// clear local and session storage
 			[window.localStorage, window.sessionStorage].forEach((storage) => {
