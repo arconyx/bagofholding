@@ -5,7 +5,6 @@ export const load: PageLoad = async ({ parent }) => {
     const { data, error } = await supabase.from("collections").select()
 
     if (!error) {
-        console.log("Loaded collections", data)
         return { supabase: supabase, collections: data }
     }
 
