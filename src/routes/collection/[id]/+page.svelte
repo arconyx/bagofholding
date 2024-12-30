@@ -1,12 +1,7 @@
 <script lang="ts">
 	import { base } from '$app/paths';
-	import type { FilledBag } from '$lib/schema/FilledBag';
 	import ItemList from '$lib/ItemList.svelte';
-
-	function usedCapacity(bag: FilledBag) {
-		let items = bag.items;
-		return Math.floor(items.reduce((sum, i) => sum + i.quantity * i.unit_bulk, 0));
-	}
+	import { usedCapacity } from '$lib/utils.js';
 
 	let { data } = $props();
 	const { collection, filledBags } = data;
@@ -19,7 +14,9 @@
 <ul class="mt-4">
 	{#each filledBags as bag}
 		<li class="mb-2">
-			<h2 class="text-lg">{bag.name} ({usedCapacity(bag)}/{bag.capacity})</h2>
+			<h2 class="text-lg">
+				<a href="{base}/bag/{bag.id}">{bag.name}</a> ({usedCapacity(bag)}/{bag.capacity})
+			</h2>
 			<p class="text-md">{bag.description}</p>
 			<a
 				class="text-sm"
