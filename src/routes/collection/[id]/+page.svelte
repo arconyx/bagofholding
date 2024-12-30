@@ -31,4 +31,4 @@
 	{/each}
 </ul>
 
-<a class="mt-8 block" href="{collection.id}/delete"> Delete Bag </a>
+<a class="mt-8 block" href="{collection.id}/delete"> Delete Collection </a>
