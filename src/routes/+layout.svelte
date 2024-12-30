@@ -3,7 +3,6 @@
 	import { base } from '$app/paths';
 	import { userState } from '$lib/state.svelte';
 	import { getUsername } from '$lib/utils';
-	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 
 	let { children, data } = $props();
@@ -12,6 +11,7 @@
 	console.log('User', userState);
 
 	supabase.auth.onAuthStateChange(async (event, session) => {
+		console.log('Auth event detected', event);
 		if (event == 'SIGNED_IN') {
 			userState.user = session?.user ?? null;
 			await getUsername(supabase);
