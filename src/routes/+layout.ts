@@ -7,7 +7,14 @@ import { userState } from "$lib/state.svelte";
 export const prerender = true;
 
 export const load: LayoutLoad = async () => {
-    const supabase = createClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_KEY)
+    const supabase = createClient<Database>(
+        PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_KEY,
+        {
+            auth: {
+                autoRefreshToken: true
+            }
+        }
+    )
     const { data } = await supabase.auth.getUser()
 
     userState.user = data.user
