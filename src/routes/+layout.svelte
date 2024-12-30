@@ -8,7 +8,7 @@
 
 <nav class="auto flex flex-row pb-2 pl-4 pr-4 pt-2">
 	<a href="{base}/collections" class="flex-grow">Collections</a>
-	{#if userState.user != null}
+	{#if userState.user}
 		<a href="{base}/auth/logout">Logout</a>
 	{:else}
 		<a href="{base}/auth/login">Login</a>

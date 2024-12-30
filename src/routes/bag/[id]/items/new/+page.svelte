@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import { userState } from '$lib/state.svelte.js';
 
 	let { data } = $props();
 	const supabase = data.supabase;
@@ -15,12 +16,6 @@
 
 		// @ts-ignore
 		const form = new FormData(event.target);
-		const { data: session_data, error } = await supabase.auth.getSession();
-
-		if (error || session_data.session == null) {
-			console.error('Error fetching session', error, session_data.session);
-			throw new Error('Invalid session');
-		}
 
 		let quantity = (form.get('quantity') ?? -1) as number;
 		if (quantity < 1) {

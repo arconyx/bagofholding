@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
+	import { userState } from '$lib/state.svelte.js';
 	import { redirect } from '@sveltejs/kit';
 
 	let { data } = $props();
@@ -16,17 +17,16 @@
 
 		// @ts-ignore
 		const form = new FormData(event.target);
-		const { data: session_data, error } = await supabase.auth.getSession();
 
-		if (error != null || session_data.session == null) {
-			console.error('Error fetching session', error, session_data.session);
+		if (!userState.user) {
+			console.error('User not set');
 			throw new Error('Invalid session');
 		}
 
 		const { data, error: sub_error } = await supabase.from('collections').insert({
 			name: form.get('name') as string,
 			description: form.get('description') as string,
-			owner_id: session_data.session.user.id
+			owner_id: userState.user.id
 		});
 
 		if (sub_error != null) {

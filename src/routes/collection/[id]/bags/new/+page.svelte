@@ -15,12 +15,6 @@
 
 		// @ts-ignore
 		const form = new FormData(event.target);
-		const { data: session_data, error } = await supabase.auth.getSession();
-
-		if (error || session_data.session == null) {
-			console.error('Error fetching session', error, session_data.session);
-			throw new Error('Invalid session');
-		}
 
 		let capacity = (form.get('capacity') ?? -1) as number;
 		if (capacity < 1) {
