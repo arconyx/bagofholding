@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { userState } from '$lib/state.svelte.js';
 
 	let { data } = $props();
 	const supabase = data.supabase;

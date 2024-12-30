@@ -3,7 +3,7 @@
 	import { base } from '$app/paths';
 	import { userState } from '$lib/state.svelte';
 
-	let { children, data } = $props();
+	let { children } = $props();
 </script>
 
 <nav class="auto flex flex-row pb-2 pl-4 pr-4 pt-2">
