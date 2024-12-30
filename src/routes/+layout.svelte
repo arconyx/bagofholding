@@ -7,12 +7,8 @@
 	const { supabase } = data;
 
 	supabase.auth.onAuthStateChange((event, _session) => {
-		if (event === 'SIGNED_OUT') {
-			// clear local and session storage
-			[window.localStorage, window.sessionStorage].forEach((storage) => {
-				Object.entries(storage).forEach(([key]) => {
-					storage.removeItem(key);
-				});
+		if 
+			[window.localStorage, window.sessionStorage].fo
 			});
 		}
 	});
