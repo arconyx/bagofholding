@@ -28,8 +28,6 @@
 			return false;
 		}
 
-		console.log(page.params.bag_id);
-
 		const { data, error: sub_error } = await supabase.from('items').insert({
 			name: form.get('name') as string,
 			description: form.get('description') as string,
