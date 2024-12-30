@@ -4,8 +4,6 @@ import { error } from "@sveltejs/kit";
 import type { Database } from "$lib/supabase";
 import type { FilledBag } from "$lib/schema/FilledBag";
 
-export const ssr = false; // needs to be false for vite dev
-
 async function getBagItems(supabase: SupabaseClient<Database>, bag: { id: string }) {
     const { data, error } = await supabase.from("items").select().eq("bag_id", bag.id)
     if (error != null) {
@@ -16,28 +14,16 @@ async function getBagItems(supabase: SupabaseClient<Database>, bag: { id: string
 
 export const load: PageLoad = async ({ parent, params }) => {
     console.log("Running load")
-    const { supabase } = await parent();
+    const { supabase, collection } = await parent();
     console.log("Supabase is", supabase)
 
-    const colandbags = await Promise.all(
-        [
-            supabase
-                .from("collections")
-                .select()
-                .eq('id', params.id)
-                .single(),
-            supabase
-                .from("bags")
-                .select()
-                .eq("collection_id", params.id)
-        ]
-    )
+    const { data: bags, error: bags_error } = await supabase
+        .from("bags")
+        .select()
+        .eq("collection_id", params.id)
 
-    const { data: collection, error: col_error } = colandbags[0]
-    const { data: bags, error: bags_error } = colandbags[1]
-
-    if (col_error != null || bags_error != null) {
-        console.error(`Error fetching collection ${params.id}`, col_error, collection)
+    if (bags_error || bags == null) {
+        console.error(`Error fetching bags for collection ${params.id}`, bags_error, collection)
         error(404, "Collection not found")
     }
 
