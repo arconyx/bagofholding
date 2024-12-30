@@ -9,7 +9,7 @@
 		const { data, error } = await supabase.auth.signInWithOAuth({
 			provider: 'discord',
 			options: {
-				redirectTo: `${origin}${base}/collections`
+				redirectTo: `${origin}${base}/auth/callback`
 			}
 		});
 		return;

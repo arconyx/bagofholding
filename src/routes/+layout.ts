@@ -6,7 +6,11 @@ import { userState } from "$lib/state.svelte";
 
 export const prerender = true;
 
+
+
 export const load: LayoutLoad = async () => {
+    console.log("Load called")
+
     const supabase = createClient<Database>(
         PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_KEY,
         {
@@ -16,16 +20,7 @@ export const load: LayoutLoad = async () => {
         }
     )
     const { data } = await supabase.auth.getUser()
-
     userState.user = data.user
-
-    supabase.auth.onAuthStateChange((event, session) => {
-        if (event == 'SIGNED_IN') {
-            userState.user = session?.user ?? null
-        } else if (event === 'SIGNED_OUT') {
-            userState.user = null
-        }
-    });
 
     return { supabase }
 }

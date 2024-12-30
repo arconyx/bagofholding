@@ -2,18 +2,32 @@
 	import '../app.css';
 	import { base } from '$app/paths';
 	import { userState } from '$lib/state.svelte';
+	import { getUsername } from '$lib/utils';
+	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
 
 	let { children, data } = $props();
 	const { supabase } = data;
 
-	supabase.auth.onAuthStateChange((event, _session) => {
-		if (event === 'SIGNED_OUT') {
+	console.log('User', userState);
+
+	supabase.auth.onAuthStateChange(async (event, session) => {
+		if (event == 'SIGNED_IN') {
+			userState.user = session?.user ?? null;
+			await getUsername(supabase);
+			console.log('User update', userState);
+		} else if (event === 'SIGNED_OUT') {
+			userState.user = null;
+			userState.name = 'Anon';
+
 			// clear local and session storage
 			[window.localStorage, window.sessionStorage].forEach((storage) => {
 				Object.entries(storage).forEach(([key]) => {
 					storage.removeItem(key);
 				});
 			});
+
+			goto(base + '/');
 		}
 	});
 </script>
@@ -27,5 +41,11 @@
 	{/if}
 </nav>
 <hr class="mb-4 ml-2 mr-2" />
+
+<!-- {#if userState.user != null && userState.name === 'Anon' && !page.url
+		.toString()
+		.includes('onboard')}
+	<a class="text-sky-600" href="{base}/user/onboard">Please set your username</a>
+{/if} -->
 
 {@render children()}
