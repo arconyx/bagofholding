@@ -16,5 +16,6 @@
 		{/if}
 	</span>
 	<!-- <span class="capitalize">Type: {item.type}</span> -->
-	<a class="mt-4" href="{base}/bag/{item.bag_id}">View Bag</a>
+	<a class="pt-4" href="{base}/bag/{item.bag_id}">View Bag</a>
+	<a class="pt-4 text-sm" href="{item.id}/delete">Delete Item</a>
 </div>
