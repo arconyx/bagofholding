@@ -8,14 +8,14 @@
 	let { children, data } = $props();
 	const { supabase } = data;
 
-	console.log('User', userState);
+	// console.log('User', userState);
 
 	supabase.auth.onAuthStateChange(async (event, session) => {
 		console.log('Auth event detected', event);
 		if (event == 'SIGNED_IN') {
 			userState.user = session?.user ?? null;
 			await getUsername(supabase);
-			console.log('User update', userState);
+			// console.log('User update', userState);
 		} else if (event === 'SIGNED_OUT') {
 			userState.user = null;
 			userState.name = 'Anon';

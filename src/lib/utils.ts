@@ -1,6 +1,5 @@
 import type { FilledBag } from "./schema/FilledBag";
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { error } from '@sveltejs/kit';
 import { goto } from '$app/navigation';
 import { base } from '$app/paths';
 import { userState } from '$lib/state.svelte';
@@ -15,7 +14,8 @@ export async function getUsername(supabase: SupabaseClient<Database>) {
     console.log("Getting username")
 
     if (!userState.user) {
-        error(500, 'User is still null after login');
+        console.warn("User is null")
+        return true
     }
 
     const { data: self, error: self_error } = await supabase
@@ -23,11 +23,13 @@ export async function getUsername(supabase: SupabaseClient<Database>) {
         .select()
         .eq('id', userState.user.id);
 
+    console.log("Retrieved username")
+
     if (self_error) {
         console.error('Something went wrong with getting player info');
         return true
     } else if (self.length == 1) {
-        console.log('This is an existing user', self);
+        console.log('This is an existing user');
         userState.name = self[0].name;
         return true
     } else if (self.length == 0) {
