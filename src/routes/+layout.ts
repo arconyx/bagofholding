@@ -16,6 +16,9 @@ export const load: LayoutLoad = async () => {
         {
             auth: {
                 autoRefreshToken: true
+            },
+            global: {
+                fetch: fetch
             }
         }
     )
