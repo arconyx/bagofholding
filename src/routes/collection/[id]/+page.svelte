@@ -33,7 +33,8 @@
 </ul>
 
 {#if userState?.user?.id === collection.owner_id}
-	<a class="mt-8 block" href="{collection.id}/delete"> Delete Collection </a>
+	<a class="mt-8 block" href="{collection.id}/members"> View Members </a>
+	<a class="mt-2 block" href="{collection.id}/delete"> Delete Collection </a>
 {:else}
 	<a class="mt-8 block" href="{collection.id}/members/leave"> Leave Collection </a>
 {/if}
