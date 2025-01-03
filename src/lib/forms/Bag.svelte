@@ -40,6 +40,7 @@
 			step="1"
 			pattern="\d+"
 			defaultValue={bag?.capacity ?? 25}
+			min="1"
 			required
 		/>
 	</label>

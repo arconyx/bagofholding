@@ -38,6 +38,7 @@
 			name="quantity"
 			type="number"
 			step="1"
+			min="1"
 			pattern="\d+"
 			defaultValue={item?.quantity ?? 1}
 			required
@@ -50,6 +51,7 @@
 			name="bulk"
 			type="number"
 			step="0.1"
+			min="0"
 			defaultValue={item?.unit_bulk ?? 1}
 			required
 		/>
