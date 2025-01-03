@@ -32,9 +32,12 @@
 	{/each}
 </ul>
 
-{#if userState?.user?.id === collection.owner_id}
-	<a class="mt-8 block" href="{collection.id}/members"> View Members </a>
-	<a class="mt-2 block" href="{collection.id}/delete"> Delete Collection </a>
-{:else}
-	<a class="mt-8 block" href="{collection.id}/members/leave"> Leave Collection </a>
-{/if}
+<div class="mt-8 grid grid-flow-row auto-rows-min grid-cols-auto-fill-48 gap-4">
+	<a href="{collection.id}/edit"> Edit Collection </a>
+	{#if userState?.user?.id === collection.owner_id}
+		<a href="{collection.id}/members"> View Members </a>
+		<a href="{collection.id}/delete"> Delete Collection </a>
+	{:else}
+		<a href="{collection.id}/members/leave"> Leave Collection </a>
+	{/if}
+</div>
