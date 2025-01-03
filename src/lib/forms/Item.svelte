@@ -20,6 +20,35 @@
 			await onSuccess();
 		}
 	}
+
+	var oldBulk = item?.unit_bulk ?? 1;
+
+	function setInitalStep(): number {
+		if ((item?.unit_bulk ?? 1) < 1) {
+			return 0.1;
+		} else {
+			return 1;
+		}
+	}
+
+	function stepBulk(this: HTMLInputElement) {
+		const newBulk = this.valueAsNumber;
+		if (oldBulk === 1 && newBulk < 1) {
+			this.valueAsNumber = 0.1;
+			this.step = '0.1';
+		} else if (oldBulk === 0.1) {
+			if (newBulk < 0.1) {
+				this.valueAsNumber = 0;
+				this.step = '0.1';
+			} else if (1 > newBulk && newBulk > 0.1) {
+				this.valueAsNumber = 1;
+				this.step = '1';
+			}
+		} else {
+			this.step = '1';
+		}
+		oldBulk = this.valueAsNumber;
+	}
 </script>
 
 <form method="POST" onsubmit={wrappedSubmit} class="grid max-w-md auto-cols-min grid-cols-1 gap-6">
@@ -50,10 +79,11 @@
 			class="block"
 			name="bulk"
 			type="number"
-			step="0.1"
+			step={setInitalStep()}
 			min="0"
 			defaultValue={item?.unit_bulk ?? 1}
 			required
+			oninput={stepBulk}
 		/>
 	</label>
 	{#if errorMsg}
