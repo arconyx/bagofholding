@@ -8,7 +8,7 @@ export const prerender = true;
 
 
 
-export const load: LayoutLoad = async () => {
+export const load: LayoutLoad = async ({ fetch }) => {
     console.log("Load called")
 
     const supabase = createClient<Database>(
