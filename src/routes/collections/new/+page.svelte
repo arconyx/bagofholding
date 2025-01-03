@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidate } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { userState } from '$lib/state.svelte.js';
 	import Collection from '$lib/forms/Collection.svelte';
@@ -8,7 +8,9 @@
 	const supabase = data.supabase;
 
 	async function onSuccess() {
-		await goto(base + '/collections');
+		const url = base + '/collections';
+		await invalidate(url);
+		await goto(url);
 	}
 
 	async function submit(formElement: HTMLFormElement, event: SubmitEvent): Promise<string | null> {
