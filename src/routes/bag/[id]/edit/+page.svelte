@@ -8,7 +8,6 @@
 	const { bag, supabase } = data;
 
 	async function onSuccess() {
-		console.log('Bag on success', bag);
 		const url = `${base}/bag/${bag.id}`;
 		await goto(url);
 	}
@@ -17,7 +16,6 @@
 		event.preventDefault();
 
 		const form = new FormData(formElement);
-		console.log('Bag on submit', bag);
 
 		if (!userState.user) {
 			console.error('User not set');
