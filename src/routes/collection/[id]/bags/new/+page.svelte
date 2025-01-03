@@ -1,11 +1,18 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import Bag from '$lib/forms/Bag.svelte';
+	import { goto, invalidate } from '$app/navigation';
 	import { page } from '$app/state';
 
 	let { data } = $props();
-	const supabase = data.supabase;
+	const { supabase } = data;
 
-	async function submit(event: SubmitEvent) {
+	async function onSuccess() {
+		const url = '../';
+		await invalidate(url);
+		await goto(url);
+	}
+
+	async function submit(formElement: HTMLFormElement, event: SubmitEvent): Promise<string | null> {
 		if (event.target == null) {
 			console.error('Invalid event target');
 			throw new Error('Invalid input');
@@ -18,8 +25,7 @@
 
 		let capacity = (form.get('capacity') ?? -1) as number;
 		if (capacity < 1) {
-			// TODO: Error properly
-			return false;
+			return 'Capacity must be at least one';
 		}
 
 		const { data, error: sub_error } = await supabase.from('bags').insert({
@@ -32,29 +38,12 @@
 		if (sub_error != null) {
 			// TODO: Error handling
 			console.error('Failed to create bag', sub_error, data);
-			return false;
+			return 'Unable to create bag.';
 		}
-
-		goto('../');
-
-		return false;
+		return null;
 	}
 </script>
 
 <h1 class="text-xl">Create Bag</h1>
 
-<form method="POST" onsubmit={submit}>
-	<label>
-		Name
-		<input name="name" type="text" required />
-	</label>
-	<label>
-		Description
-		<input name="description" type="text" />
-	</label>
-	<label>
-		Capacity
-		<input name="capacity" type="number" step="1" pattern="\d+" defaultValue="25" required />
-	</label>
-	<button>Create</button>
-</form>
+<Bag bag={null} {submit} {onSuccess} submitLabel="Create" />
