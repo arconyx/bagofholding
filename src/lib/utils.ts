@@ -30,7 +30,6 @@ export async function getUsername(supabase: SupabaseClient<Database>) {
         return true
     } else if (self.length == 1) {
         console.log('This is an existing user');
-        userState.name = self[0].name;
         return true
     } else if (self.length == 0) {
         console.log('New user detected, onboarding');

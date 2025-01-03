@@ -2,7 +2,6 @@
 	import '../app.css';
 	import { base } from '$app/paths';
 	import { userState } from '$lib/state.svelte';
-	import { getUsername } from '$lib/utils';
 	import { goto } from '$app/navigation';
 
 	let { children, data } = $props();
@@ -14,11 +13,9 @@
 		console.log('Auth event detected', event);
 		if (event == 'SIGNED_IN') {
 			userState.user = session?.user ?? null;
-			// await getUsername(supabase); causes hangs?
 			console.log('User update', $state.snapshot(userState));
 		} else if (event === 'SIGNED_OUT') {
 			userState.user = null;
-			userState.name = 'Anon';
 
 			// clear local and session storage
 			[window.localStorage, window.sessionStorage].forEach((storage) => {

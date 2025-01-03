@@ -32,8 +32,6 @@
 			return false;
 		}
 
-		userState.name = name;
-
 		goto(base + '/collections');
 		return false;
 	}
