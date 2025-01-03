@@ -14,8 +14,8 @@
 		console.log('Auth event detected', event);
 		if (event == 'SIGNED_IN') {
 			userState.user = session?.user ?? null;
-			await getUsername(supabase);
-			// console.log('User update', userState);
+			// await getUsername(supabase); causes hangs?
+			console.log('User update', $state.snapshot(userState));
 		} else if (event === 'SIGNED_OUT') {
 			userState.user = null;
 			userState.name = 'Anon';
@@ -41,11 +41,5 @@
 	{/if}
 </nav>
 <hr class="mb-4 ml-2 mr-2" />
-
-<!-- {#if userState.user != null && userState.name === 'Anon' && !page.url
-		.toString()
-		.includes('onboard')}
-	<a class="text-sky-600" href="{base}/user/onboard">Please set your username</a>
-{/if} -->
 
 {@render children()}
