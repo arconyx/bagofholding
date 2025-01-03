@@ -8,10 +8,12 @@
 
 <h2 class="text-lg">{bag.name} ({usedCapacity(bag)}/{bag.capacity})</h2>
 <p class="text-md">{bag.description}</p>
-<a class="pr-4 text-sm" href="{base}/bag/{bag.id}/items/new?redir={encodeURIComponent('../')}">
-	Add Item
-</a>
-<a class="pr-4 text-sm" href="{base}/collection/{bag.collection_id}">View collection</a>
-<a class="pr-4 text-sm" href="{bag.id}/delete">Delete Bag</a>
 
 <ItemList items={bag.items} />
+
+<div class="mt-8 grid grid-flow-row auto-rows-min grid-cols-auto-fill-48 gap-4 text-center">
+	<a href="{base}/bag/{bag.id}/items/new?redir={encodeURIComponent('../')}"> Add Item </a>
+	<a href="{base}/collection/{bag.collection_id}">View collection</a>
+	<a href="{bag.id}/edit">Edit Bag</a>
+	<a href="{bag.id}/delete">Delete Bag</a>
+</div>
