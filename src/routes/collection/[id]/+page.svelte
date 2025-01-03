@@ -32,7 +32,7 @@
 	{/each}
 </ul>
 
-<div class="mt-8 grid grid-flow-row auto-rows-min grid-cols-auto-fill-48 gap-4">
+<div class="mt-8 grid grid-flow-row auto-rows-min grid-cols-auto-fill-48 gap-4 text-center">
 	<a href="{collection.id}/edit"> Edit Collection </a>
 	{#if userState?.user?.id === collection.owner_id}
 		<a href="{collection.id}/members"> View Members </a>
