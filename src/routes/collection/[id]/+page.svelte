@@ -13,6 +13,7 @@
 <a href="{collection.id}/bags/new">Add Bag</a>
 
 <ul class="mt-4">
+	<!-- TODO: Sort bags before displaying -->
 	{#each filledBags as bag}
 		<li class="mb-2">
 			<h2 class="text-lg">
