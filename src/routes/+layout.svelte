@@ -37,6 +37,8 @@
 		<a href="{base}/auth/login">Login</a>
 	{/if}
 </nav>
-<hr class="mb-4 ml-2 mr-2" />
+<hr class="mb-2 ml-2 mr-2" />
 
-{@render children()}
+<div class="p-2">
+	{@render children()}
+</div>
