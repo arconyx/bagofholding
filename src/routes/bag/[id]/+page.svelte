@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import ItemList from '$lib/ItemList.svelte';
+	import PurseDisplay from '$lib/PurseDisplay.svelte';
 	import { usedCapacity } from '$lib/utils.js';
 	const { data } = $props();
 	const { bag } = data;
@@ -8,6 +9,8 @@
 
 <h2 class="text-lg">{bag.name} ({usedCapacity(bag)}/{bag.capacity})</h2>
 <p class="text-md">{bag.description}</p>
+
+<PurseDisplay purse={bag.purse} />
 
 <ItemList items={bag.items} />
 
