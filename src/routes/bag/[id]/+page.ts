@@ -1,4 +1,4 @@
-import type { FilledBag } from "$lib/schema/FilledBag.js";
+import { convertBagToFilledBag, type FilledBag } from "$lib/schema/FilledBag.js";
 import { error } from "@sveltejs/kit";
 
 export const load = async ({ parent, params }) => {
@@ -15,8 +15,7 @@ export const load = async ({ parent, params }) => {
         error(404, "Bag items not found")
     }
 
-    const filledBag = bag as FilledBag
-    filledBag.items = data
+    const filledBag = convertBagToFilledBag(bag, data)
 
     return { supabase, bag: filledBag }
 };

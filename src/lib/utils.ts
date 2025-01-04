@@ -6,8 +6,13 @@ import { userState } from '$lib/state.svelte';
 import type { Database } from "./supabase";
 
 export function usedCapacity(bag: FilledBag) {
-    let items = bag.items;
-    return Math.floor(items.reduce((sum, i) => sum + i.quantity * i.unit_bulk, 0));
+    const items = bag.items;
+    var bulk = Math.floor(items.reduce((sum, i) => sum + i.quantity * i.unit_bulk, 0))
+    if (bag.purse) {
+        bulk += Math.floor((bag.purse.platinum + bag.purse.gold + bag.purse.silver + bag.purse.copper) / 1000)
+    }
+
+    return bulk;
 }
 
 export async function getUsername(supabase: SupabaseClient<Database>) {

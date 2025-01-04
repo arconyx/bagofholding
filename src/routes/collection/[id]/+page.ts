@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { PageLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 import type { Database } from "$lib/supabase";
-import type { FilledBag } from "$lib/schema/FilledBag";
+import { convertBagToFilledBag, type FilledBag } from "$lib/schema/FilledBag";
 
 async function getBagItems(supabase: SupabaseClient<Database>, bag: { id: string }) {
     const { data, error } = await supabase.from("items").select().eq("bag_id", bag.id)
@@ -35,9 +35,8 @@ export const load: PageLoad = async ({ parent, params }) => {
             console.error("Bag not found", items, bags)
             continue
         }
-        let fbag = bag as FilledBag
-        fbag['items'] = items.items
-        filledBags.push(fbag)
+
+        filledBags.push(convertBagToFilledBag(bag, items.items))
     }
 
     return { collection, filledBags }
