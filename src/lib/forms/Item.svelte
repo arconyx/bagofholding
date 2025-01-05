@@ -84,6 +84,7 @@
 			defaultValue={item?.unit_bulk ?? 1}
 			required
 			oninput={stepBulk}
+   novalidate
 		/>
 	</label>
 	{#if errorMsg}
