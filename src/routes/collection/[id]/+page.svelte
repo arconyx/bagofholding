@@ -26,15 +26,19 @@
 				<a href="{base}/bag/{bag.id}">{bag.name}</a> ({usedCapacity(bag)}/{bag.capacity})
 			</h2>
 			<p class="text-md">{bag.description}</p>
-			<PurseDisplay {bag} prefix="Purse: " />
-			<a
-				class="text-sm"
-				href="{base}/bag/{bag.id}/items/new?redir={encodeURIComponent(
-					base + '/collection/' + collection.id
-				)}"
-			>
-				Add Item
-			</a>
+			<PurseDisplay {bag} prefix="Coin: " />
+			<div class="flex gap-4">
+				<a
+					class="block text-sm"
+					href="{base}/bag/{bag.id}/items/new?redir={encodeURIComponent(
+						base + '/collection/' + collection.id
+					)}"
+				>
+					Add Item
+				</a>
+				<a class="block text-sm" href="{base}/bag/{bag.id}/edit/coin"> Edit Coin </a>
+			</div>
+
 			<ItemList items={bag.items} />
 		</li>
 	{/each}
