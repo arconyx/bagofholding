@@ -19,7 +19,7 @@
 
 <h1 class="text-xl">{collection.name}</h1>
 <p class="text-md">{collection.description}</p>
-<div class="mb-4"><PurseDisplay purse={combinedPurse} /></div>
+<div class="mb-4"><PurseDisplay purse={combinedPurse} prefix="Total Purse: " /></div>
 
 <ul class="mt-4">
 	<!-- TODO: Sort bags before displaying -->
@@ -29,6 +29,7 @@
 				<a href="{base}/bag/{bag.id}">{bag.name}</a> ({usedCapacity(bag)}/{bag.capacity})
 			</h2>
 			<p class="text-md">{bag.description}</p>
+			<PurseDisplay purse={bag.purse} prefix="Purse: " />
 			<a
 				class="text-sm"
 				href="{base}/bag/{bag.id}/items/new?redir={encodeURIComponent(

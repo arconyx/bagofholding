@@ -10,7 +10,7 @@
 <h2 class="text-lg">{bag.name} ({usedCapacity(bag)}/{bag.capacity})</h2>
 <p class="text-md">{bag.description}</p>
 
-<PurseDisplay purse={bag.purse} />
+<PurseDisplay purse={bag.purse} prefix="Funds: " />
 
 <ItemList items={bag.items} />
 
