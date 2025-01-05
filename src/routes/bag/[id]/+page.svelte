@@ -16,6 +16,7 @@
 
 <div class="mt-8 grid grid-flow-row auto-rows-min grid-cols-auto-fill-48 gap-4 text-center">
 	<a href="{base}/bag/{bag.id}/items/new?redir={encodeURIComponent('../')}"> Add Item </a>
+	<a href="{base}/bag/{bag.id}/edit/coin">Edit Coin</a>
 	<a href="{base}/collection/{bag.collection_id}">View collection</a>
 	<a href="{bag.id}/edit">Edit Bag</a>
 	<a href="{bag.id}/delete">Delete Bag</a>
