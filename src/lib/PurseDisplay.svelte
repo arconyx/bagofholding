@@ -1,34 +1,35 @@
 <script lang="ts">
-	import { getPurseTotalGp, type Purse } from './schema/Purse';
+	import type { Tables } from './supabase';
+	import { purseGpEquivalent } from './utils';
 
 	interface Props {
-		purse: Purse;
+		bag: Tables<'bags'>;
 		prefix: string;
 	}
 
-	const { purse, prefix }: Props = $props();
+	const { bag, prefix }: Props = $props();
 
-	function getPurseString(purse: Purse, prefix: string): string | null {
-		if (getPurseTotalGp(purse) > 0) {
+	function getPurseString(bag: Tables<'bags'>, prefix: string): string | null {
+		if (purseGpEquivalent(bag) > 0) {
 			const parts: string[] = new Array();
-			if (purse.platinum > 0) {
-				parts.push(`${purse.platinum} pp`);
+			if (bag.coin_platinum > 0) {
+				parts.push(`${bag.coin_platinum} pp`);
 			}
-			if (purse.gold > 0) {
-				parts.push(`${purse.gold} gp`);
+			if (bag.coin_gold > 0) {
+				parts.push(`${bag.coin_gold} gp`);
 			}
-			if (purse.silver > 0) {
-				parts.push(`${purse.silver} sp`);
+			if (bag.coin_silver > 0) {
+				parts.push(`${bag.coin_silver} sp`);
 			}
-			if (purse.copper > 0) {
-				parts.push(`${purse.copper} cp`);
+			if (bag.coin_copper > 0) {
+				parts.push(`${bag.coin_copper} cp`);
 			}
 			return `${prefix}${parts.join(', ')}`;
 		}
 		return null;
 	}
 
-	const display = getPurseString(purse, prefix);
+	const display = getPurseString(bag, prefix);
 </script>
 
 <div>

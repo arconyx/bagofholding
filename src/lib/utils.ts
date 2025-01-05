@@ -3,14 +3,16 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { goto } from '$app/navigation';
 import { base } from '$app/paths';
 import { userState } from '$lib/state.svelte';
-import type { Database } from "./supabase";
+import type { Database, Tables } from "./supabase";
+
+export function purseGpEquivalent(bag: Tables<"bags">) {
+    return 10 * bag.coin_platinum + bag.coin_gold + 0.1 * bag.coin_silver + 0.01 * bag.coin_copper
+}
 
 export function usedCapacity(bag: FilledBag) {
     const items = bag.items;
     var bulk = Math.floor(items.reduce((sum, i) => sum + i.quantity * i.unit_bulk, 0))
-    if (bag.purse) {
-        bulk += Math.floor((bag.purse.platinum + bag.purse.gold + bag.purse.silver + bag.purse.copper) / 1000)
-    }
+    bulk += Math.floor((bag.coin_platinum + bag.coin_gold + bag.coin_silver + bag.coin_copper) / 1000)
 
     return bulk;
 }

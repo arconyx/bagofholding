@@ -8,18 +8,15 @@
 	let { data } = $props();
 	const { collection, filledBags } = data;
 
-	const combinedPurse = { platinum: 0, gold: 0, silver: 0, copper: 0 };
+	var totalGP = $state(0);
 	filledBags.forEach((i) => {
-		combinedPurse.platinum += i.purse.platinum;
-		combinedPurse.gold += i.purse.gold;
-		combinedPurse.silver += i.purse.silver;
-		combinedPurse.copper += i.purse.copper;
+		totalGP += 10 * i.coin_platinum + i.coin_gold + 0.1 * i.coin_silver + i.coin_gold;
 	});
 </script>
 
 <h1 class="text-xl">{collection.name}</h1>
 <p class="text-md">{collection.description}</p>
-<div class="mb-4"><PurseDisplay purse={combinedPurse} prefix="Total Purse: " /></div>
+<div class="mb-4">Total Funds: {totalGP} gp</div>
 
 <ul class="mt-4">
 	<!-- TODO: Sort bags before displaying -->
@@ -29,7 +26,7 @@
 				<a href="{base}/bag/{bag.id}">{bag.name}</a> ({usedCapacity(bag)}/{bag.capacity})
 			</h2>
 			<p class="text-md">{bag.description}</p>
-			<PurseDisplay purse={bag.purse} prefix="Purse: " />
+			<PurseDisplay {bag} prefix="Purse: " />
 			<a
 				class="text-sm"
 				href="{base}/bag/{bag.id}/items/new?redir={encodeURIComponent(

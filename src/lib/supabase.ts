@@ -37,6 +37,10 @@ export type Database = {
       bags: {
         Row: {
           capacity: number
+          coin_copper: number
+          coin_gold: number
+          coin_platinum: number
+          coin_silver: number
           collection_id: string
           created_at: string
           description: string | null
@@ -46,6 +50,10 @@ export type Database = {
         }
         Insert: {
           capacity: number
+          coin_copper?: number
+          coin_gold?: number
+          coin_platinum?: number
+          coin_silver?: number
           collection_id: string
           created_at?: string
           description?: string | null
@@ -55,6 +63,10 @@ export type Database = {
         }
         Update: {
           capacity?: number
+          coin_copper?: number
+          coin_gold?: number
+          coin_platinum?: number
+          coin_silver?: number
           collection_id?: string
           created_at?: string
           description?: string | null
