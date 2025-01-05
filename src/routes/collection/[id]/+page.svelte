@@ -10,7 +10,7 @@
 
 	var totalGP = $state(0);
 	filledBags.forEach((i) => {
-		totalGP += 10 * i.coin_platinum + i.coin_gold + 0.1 * i.coin_silver + i.coin_gold;
+		totalGP += 10 * i.coin_platinum + i.coin_gold + 0.1 * i.coin_silver + 0.01 * i.coin_copper;
 	});
 </script>
 
