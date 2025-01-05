@@ -23,19 +23,19 @@
 		}
 
 		const platinum = (form.get('platinum') ?? -1) as number;
-		if (platinum < 1) {
+		if (platinum < 0) {
 			return 'Platinum cannot be negative';
 		}
 		const gold = (form.get('gold') ?? -1) as number;
-		if (platinum < 1) {
+		if (gold < 0) {
 			return 'Gold cannot be negative';
 		}
 		const silver = (form.get('silver') ?? -1) as number;
-		if (platinum < 1) {
+		if (silver < 0) {
 			return 'Silver cannot be negative';
 		}
 		const copper = (form.get('copper') ?? -1) as number;
-		if (platinum < 1) {
+		if (copper < 0) {
 			return 'Copper cannot be negative';
 		}
 
