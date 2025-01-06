@@ -21,9 +21,18 @@
 			return 'Quantity must be at least one';
 		}
 
-		let bulk = (form.get('bulk') ?? -1) as number;
+		console.log('Checked status', form.get('light_bulk'));
+
+		// 'on' if checked, else null
+		const isLight = form.get('light_bulk') === 'on';
+		let bulk = -2;
+		if (isLight) {
+			bulk = 0.1;
+		} else {
+			bulk = (form.get('bulk') ?? -1) as number;
+		}
 		if (bulk < 0) {
-			return 'Bulk cannot be negative.';
+			return `Bulk is ${bulk} but bulk cannot be negative.`;
 		}
 
 		const { data, error: sub_error } = await supabase
