@@ -19,6 +19,10 @@
 			   else {return 0}
 		      }
 		  )
+	     } else if (sort === 'total_bulk:9-0') {
+		  return items.sort((a,b) => {
+		  return (b.quantity * b.unit_bulk) - (a.quantity * a.unit_bulk);
+		  })
 	     } else {
 		  return items
 	     }
@@ -26,10 +30,12 @@
 
 
 	 const sortNameAZ = () => {items = sortItems('name:a-z')} 
+	 const sortTotalBulk90 = () => {items = sortItems('total_bulk:9-0')} 
 </script>
 
-<div>
+<div class="text-sm">
     <button onclick={sortNameAZ}>Sort A-Z</button>
+    <button onclick={sortTotalBulk90}>Sort Bulk</button>
 </div>
 <ul class="grid grid-flow-row auto-rows-min grid-cols-auto-fill-48">
 	{#each items as item}
