@@ -10,7 +10,7 @@
 </script>
 
 <div
-	class="m-2 border-2 bg-slate-50 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
+	class="border-2 bg-slate-50 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
 >
 	<a class="block h-full w-full" href="{base}/item/{item.id}">
 		<li data-item-id={item.id} class="flex h-full min-w-44 flex-col p-2">

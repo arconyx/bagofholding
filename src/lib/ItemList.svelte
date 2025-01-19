@@ -41,7 +41,7 @@
 	<button onclick={sortNameAZ}>Sort A-Z</button>
 	<button onclick={sortTotalBulk90}>Sort Bulk</button>
 </div>
-<ul class="grid grid-flow-row auto-rows-min grid-cols-auto-fill-48">
+<ul class="grid grid-flow-row auto-rows-min grid-cols-auto-fill-48 gap-2">
 	{#each items as item}
 		<ItemBox {item} />
 	{/each}
