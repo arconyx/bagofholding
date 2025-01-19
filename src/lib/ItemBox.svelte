@@ -15,7 +15,9 @@
 	<a class="block h-full w-full" href="{base}/item/{item.id}">
 		<li data-item-id={item.id} class="flex h-full min-w-44 flex-col p-2">
 			<h3 class="flex-inital text-lg">{item.name}</h3>
-			<p class="text-md flex-grow">{item.description}</p>
+			<p class="text-md line-clamp-2 flex-grow">
+				{item.description}
+			</p>
 			<div class="flex flex-initial flex-row">
 				<span class="flex-auto text-sm text-slate-600">{item.quantity}x</span>
 				<span class="text-sm text-slate-600">{item.unit_bulk * item.quantity} bulk</span>
