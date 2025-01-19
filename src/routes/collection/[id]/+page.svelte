@@ -27,16 +27,15 @@
 			</h2>
 			<p class="text-md">{bag.description}</p>
 			<PurseDisplay {bag} prefix="Coin: " />
-			<div class="flex gap-4">
+			<div class="mb-4 flex gap-4 text-sm">
 				<a
-					class="block text-sm"
 					href="{base}/bag/{bag.id}/items/new?redir={encodeURIComponent(
 						base + '/collection/' + collection.id
 					)}"
 				>
 					Add Item
 				</a>
-				<a class="block text-sm" href="{base}/bag/{bag.id}/edit/coin"> Edit Coin </a>
+				<a href="{base}/bag/{bag.id}/edit/coin"> Edit Coin </a>
 			</div>
 
 			<ItemList items={bag.items} />
