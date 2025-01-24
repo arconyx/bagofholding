@@ -20,6 +20,7 @@
 
 <div class="mt-8 grid grid-flow-row auto-rows-min grid-cols-auto-fill-48 gap-4 text-center">
 	<a href="{base}/bag/{item.bag_id}">View bag</a>
+	<a href="{item.id}/move">Move bag</a>
 	<a href="{item.id}/edit">Edit Item</a>
 	<a href="{item.id}/delete">Delete Item</a>
 </div>
