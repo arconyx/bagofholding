@@ -12,3 +12,5 @@ export const load: PageLoad = async ({ parent }) => {
     console.error("Error loading collection", error)
     throw new Error("Unable to load collections");
 };
+
+export const ssr = false;

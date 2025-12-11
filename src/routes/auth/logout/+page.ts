@@ -7,3 +7,4 @@ export const load: PageLoad = async ({ parent }) => {
     await supabase.auth.signOut()
     redirect(303, `${base}/`)
 };
+export const ssr = false;
