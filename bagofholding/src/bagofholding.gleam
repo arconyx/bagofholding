@@ -17,7 +17,12 @@ pub fn main() -> Nil {
 }
 
 type Model {
-  Model(route: Route)
+  Anon(route: Route)
+  LoggedIn(route: Route, user: User)
+}
+
+type User {
+  User
 }
 
 fn init(_: a) -> #(Model, Effect(Msg)) {
@@ -26,10 +31,10 @@ fn init(_: a) -> #(Model, Effect(Msg)) {
   // the first URL so we can parse it for the app's initial route.
   let route = case modem.initial_uri() {
     Ok(uri) -> parse_route(uri)
-    Error(_) -> Index
+    Error(_) -> Index |> Public
   }
 
-  let model = Model(route:)
+  let model = Anon(route:)
 
   let effect =
     // We need to initialise modem in order for it to intercept links. To do that
@@ -45,11 +50,20 @@ fn init(_: a) -> #(Model, Effect(Msg)) {
 }
 
 type Route {
+  Public(PublicRoute)
+  Private(PrivateRoute)
+}
+
+type PublicRoute {
   Index
+  NotFound(uri: Uri)
 
   AuthLogin
-  AuthLogout
   AuthCallback
+}
+
+type PrivateRoute {
+  AuthLogout
 
   BagView(id: BagId)
   BagEdit(id: BagId)
@@ -67,8 +81,6 @@ type Route {
   CollectionsCreate
 
   UserOnboard
-
-  NotFound(uri: Uri)
 }
 
 // TODO: Use uuid type for uuids for consistent comparison and display
@@ -83,30 +95,34 @@ type CollectionId {
 fn parse_route(uri: Uri) -> Route {
   // TODO: Base dir
   case uri.path_segments(uri.path) {
-    [] | [""] -> Index
+    [] | [""] -> Index |> Public
 
-    ["auth", "login"] -> AuthLogin
-    ["auth", "logout"] -> AuthLogout
-    ["auth", "callback"] -> AuthCallback
+    ["auth", "login"] -> AuthLogin |> Public
+    ["auth", "logout"] -> AuthLogout |> Private
+    ["auth", "callback"] -> AuthCallback |> Public
 
-    ["bag", id] -> BagId(id) |> BagView
-    ["bag", id, "edit"] -> BagId(id) |> BagEdit
-    ["bag", id, "delete"] -> BagId(id) |> BagDelete
-    ["bag", id, "items", "new"] -> BagId(id) |> BagAddItem
+    ["bag", id] -> BagId(id) |> BagView |> Private
+    ["bag", id, "edit"] -> BagId(id) |> BagEdit |> Private
+    ["bag", id, "delete"] -> BagId(id) |> BagDelete |> Private
+    ["bag", id, "items", "new"] -> BagId(id) |> BagAddItem |> Private
 
-    ["collection", id] -> CollectionId(id) |> CollectionView
-    ["collection", id, "edit"] -> CollectionId(id) |> CollectionEdit
-    ["collection", id, "delete"] -> CollectionId(id) |> CollectionDelete
-    ["collection", id, "bags", "new"] -> CollectionId(id) |> CollectionCreateBag
-    ["collection", id, "members"] -> CollectionId(id) |> CollectionMembers
-    ["collection", id, "leave"] -> CollectionId(id) |> CollectionLeave
+    ["collection", id] -> CollectionId(id) |> CollectionView |> Private
+    ["collection", id, "edit"] -> CollectionId(id) |> CollectionEdit |> Private
+    ["collection", id, "delete"] ->
+      CollectionId(id) |> CollectionDelete |> Private
+    ["collection", id, "bags", "new"] ->
+      CollectionId(id) |> CollectionCreateBag |> Private
+    ["collection", id, "members"] ->
+      CollectionId(id) |> CollectionMembers |> Private
+    ["collection", id, "leave"] ->
+      CollectionId(id) |> CollectionLeave |> Private
 
-    ["collections"] -> CollectionsList
-    ["collections", "new"] -> CollectionsCreate
+    ["collections"] -> CollectionsList |> Private
+    ["collections", "new"] -> CollectionsCreate |> Private
 
-    ["user", "onboard"] -> UserOnboard
+    ["user", "onboard"] -> UserOnboard |> Private
 
-    _ -> NotFound(uri:)
+    _ -> NotFound(uri:) |> Public
   }
 }
 
@@ -114,12 +130,20 @@ fn parse_route(uri: Uri) -> Route {
 /// can then use on `html.a` elements. It is important to keep this function in
 /// sync with the parsing, but once you do, all links are guaranteed to work!
 ///
-fn href(route: Route) -> Attribute(msg) {
+fn href_public(route: PublicRoute) -> Attribute(msg) {
   let url = case route {
     Index -> "/"
     AuthLogin -> "/auth/login"
-    AuthLogout -> "/auth/logout"
     AuthCallback -> "/auth/callback"
+    NotFound(_) -> "/404"
+  }
+
+  attribute.href(url)
+}
+
+fn href_private(route: PrivateRoute) -> Attribute(msg) {
+  let url = case route {
+    AuthLogout -> "/auth/logout"
     BagView(id:) -> "/bag/" <> id.uuid
     BagEdit(id:) -> "/bag/" <> id.uuid <> "/edit"
     BagDelete(id:) -> "/bag/" <> id.uuid <> "/delete"
@@ -133,7 +157,6 @@ fn href(route: Route) -> Attribute(msg) {
     CollectionsList -> "/collections"
     CollectionsCreate -> "/collections/new"
     UserOnboard -> "/user/onboard"
-    NotFound(_) -> "/404"
   }
 
   attribute.href(url)
@@ -143,12 +166,20 @@ type Msg {
   UserNavigatedTo(route: Route)
 }
 
+fn navigate(old_state model: Model, to route: Route) -> #(Model, Effect(Msg)) {
+  let new_model = case model {
+    Anon(..) -> Anon(route:)
+    LoggedIn(..) as l -> LoggedIn(..l, route:)
+  }
+  #(new_model, effect.none())
+}
+
 fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
   case msg {
-    UserNavigatedTo(route:) -> #(Model(route:), effect.none())
+    UserNavigatedTo(route:) -> navigate(model, route)
   }
 }
 
 fn view(model: Model) -> Element(Msg) {
-  html.text(model.route |> string.inspect)
+  html.text(model |> string.inspect)
 }
