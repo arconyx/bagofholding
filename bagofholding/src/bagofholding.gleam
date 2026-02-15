@@ -181,5 +181,24 @@ fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
 }
 
 fn view(model: Model) -> Element(Msg) {
-  html.text(model |> string.inspect)
+  with_header(model, [html.text(model |> string.inspect)])
+}
+
+fn with_header(model: Model, body: List(Element(a))) -> Element(a) {
+  html.div([], [
+    html.nav(
+      [attribute.class("auto flex flex-row-reversed pb-2 pl-4 pr-4 pt-2")],
+      case model {
+        Anon(route: _) -> [
+          html.a([href_public(AuthLogin)], [html.text("Log in")]),
+        ]
+        LoggedIn(route: _, user: _) -> [
+          html.a([href_private(AuthLogout)], [html.text("Log out")]),
+          html.a([href_private(CollectionsList)], [html.text("Collections")]),
+        ]
+      },
+    ),
+    html.hr([attribute.class("mb-2 ml-2 mr-2")]),
+    html.main([attribute.class("p-2")], body),
+  ])
 }
