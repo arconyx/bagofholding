@@ -17,7 +17,7 @@
         default = pkgs.mkShell {
           buildInputs = [
             pkgs.bashInteractive
-            pkgs.nodejs_24
+            pkgs.nodejs
             pkgs.nodePackages.pnpm
             pkgs.nodePackages.typescript
             pkgs.nodePackages.typescript-language-server
