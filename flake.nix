@@ -24,6 +24,10 @@
 
             gleam
             erlang
+            beamPackages.rebar3
+            inotify-tools
+            bun
+            tailwindcss
           ];
         };
       });
