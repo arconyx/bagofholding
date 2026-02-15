@@ -15,12 +15,15 @@
     {
       devShells = forAllSystems (pkgs: {
         default = pkgs.mkShell {
-          buildInputs = [
-            pkgs.bashInteractive
-            pkgs.nodejs-slim
-            pkgs.nodePackages.pnpm
-            pkgs.nodePackages.typescript
-            pkgs.nodePackages.typescript-language-server
+          buildInputs = with pkgs; [
+            bashInteractive
+            nodejs-slim
+            nodePackages.pnpm
+            nodePackages.typescript
+            nodePackages.typescript-language-server
+
+            gleam
+            erlang
           ];
         };
       });
