@@ -208,14 +208,18 @@ fn view(model: Model) -> Element(Msg) {
 fn with_header(model: Model, body: List(Element(a))) -> Element(a) {
   html.div([], [
     html.nav(
-      [class("auto flex flex-row-reversed pb-2 pl-4 pr-4 pt-2")],
+      [class("auto flex flex-row justify-between pb-2 pl-4 pr-4 pt-2")],
       case model {
         Anon(route: _) -> [
           html.a([href_public(AuthLogin)], [html.text("Sign in")]),
         ]
         LoggedIn(route: _, user: _) -> [
-          html.a([href_private(AuthLogout)], [html.text("Sign out")]),
-          html.a([href_private(CollectionsList)], [html.text("Collections")]),
+          html.div([], [
+            html.a([href_private(CollectionsList)], [html.text("Collections")]),
+          ]),
+          html.div([], [
+            html.a([href_private(AuthLogout)], [html.text("Sign out")]),
+          ]),
         ]
       },
     ),

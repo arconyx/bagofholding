@@ -26,7 +26,7 @@
             beamPackages.rebar3
             inotify-tools
             bun
-            tailwindcss
+            tailwindcss_4
           ];
         };
       });
