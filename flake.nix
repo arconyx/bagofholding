@@ -16,13 +16,12 @@
       devShells = forAllSystems (pkgs: {
         default = pkgs.mkShell {
           buildInputs = with pkgs; [
-            bashInteractive
-            nodejs-slim
-            nodePackages.pnpm
-            nodePackages.typescript
-            nodePackages.typescript-language-server
-
             gleam
+
+            # vscode appreciates this
+            bashInteractive
+
+            # lustre dev tools
             erlang
             beamPackages.rebar3
             inotify-tools

@@ -1,28 +1,17 @@
-node_modules
-
-# Output
-.output
-.vercel
-.netlify
-.wrangler
-/.svelte-kit
+*.beam
+*.ez
 /build
+erl_crash.dump
 
-# OS
-.DS_Store
-Thumbs.db
-
-# Env
-.env
-.env.*
-!.env.example
-!.env.test
-.envrc
-
-# Vite
-vite.config.js.timestamp-*
-vite.config.ts.timestamp-*
+#Added automatically by Lustre Dev Tools
+/.lustre
+/dist
 
 # dev env
 *.code-workspace
 .direnv/
+.env
+result
+
+# node stuff
+node_modules
