@@ -15,7 +15,7 @@ pub fn main() -> Nil {
 }
 
 type Model {
-  Anon(route: Route, data: PublicModel)
+  Anon(route: PublicRoute, data: PublicModel)
   LoggedIn(route: Route, data: LoggedInModel)
 }
 
@@ -40,7 +40,8 @@ fn init(_: a) -> #(Model, Effect(Msg)) {
     Error(_) -> Index |> Public
   }
 
-  let model = Anon(route, PublicModel)
+  // TODO: Read login data if present
+  let model = Anon(Index, PublicModel) |> set_route(route)
 
   let effect =
     // We need to initialise modem in order for it to intercept links. To do that
@@ -64,6 +65,7 @@ type PublicRoute {
   Index
   NotFound(uri: Uri)
 
+  // TODO: Support redirect after login
   AuthLogin
   AuthCallback
 }
@@ -174,15 +176,28 @@ type Msg {
   UserLoginAs(user: User)
 }
 
-fn navigate(old_state model: Model, to route: Route) -> #(Model, Effect(Msg)) {
-  let new_model = case model {
-    Anon(..) as a -> Anon(..a, route:)
-    LoggedIn(..) as l -> LoggedIn(..l, route:)
+fn get_route(model: Model) -> Route {
+  case model {
+    Anon(route:, ..) -> Public(route)
+    LoggedIn(route:, ..) -> route
   }
+}
+
+fn set_route(old_model model: Model, to route: Route) -> Model {
+  case model, route {
+    Anon(..) as a, Public(destination) -> Anon(..a, route: destination)
+    // TODO: Redirect after login
+    Anon(..) as a, Private(_) -> Anon(..a, route: AuthLogin)
+    LoggedIn(..) as l, destination -> LoggedIn(..l, route: destination)
+  }
+}
+
+fn navigate(old_model model: Model, to route: Route) -> #(Model, Effect(Msg)) {
+  let new_model = set_route(model, route)
   #(new_model, effect.none())
 }
 
-fn login(old_state model: Model) -> #(Model, Effect(Msg)) {
+fn login_start(old_state model: Model) -> #(Model, Effect(Msg)) {
   case model {
     // If the user is already signed in just redirect to the collections list
     LoggedIn(..) -> navigate(model, Private(CollectionsList))
@@ -199,21 +214,41 @@ fn login(old_state model: Model) -> #(Model, Effect(Msg)) {
 fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
   case msg {
     UserNavigatedTo(route:) -> navigate(model, route)
-    UserTriggerLogin -> login(model)
+    UserTriggerLogin -> login_start(model)
     UserLoginAs(user:) -> #(
-      LoggedInModel(user:) |> LoggedIn(route: model.route, data: _),
+      LoggedIn(route: get_route(model), data: LoggedInModel(user:)),
       effect.none(),
     )
   }
 }
 
 fn view(model: Model) -> Element(Msg) {
-  with_header(model, case model.route {
-    Public(Index) -> view_index(model)
-    Public(AuthLogin) -> view_login(model)
-    Public(NotFound(uri)) -> view_404(uri)
-    _ -> todo
+  with_header(model, case model {
+    Anon(route:, data:) -> view_anon(data, route)
+    LoggedIn(route:, data:) -> view_logged_in(data, route)
   })
+}
+
+fn view_anon(model: PublicModel, route: PublicRoute) {
+  case route {
+    Index -> view_index(model |> Anon(route:))
+    AuthCallback -> todo
+    AuthLogin -> view_login()
+    NotFound(uri) -> view_404(uri)
+  }
+}
+
+fn view_logged_in(model: LoggedInModel, route: Route) {
+  case route {
+    Public(route) ->
+      case route {
+        Index -> view_index(model |> LoggedIn(route: Public(route)))
+        AuthCallback -> todo
+        AuthLogin -> view_login()
+        NotFound(uri) -> view_404(uri)
+      }
+    Private(route) -> todo
+  }
 }
 
 fn with_header(model: Model, body: List(Element(a))) -> Element(a) {
@@ -278,21 +313,10 @@ fn view_index(model: Model) -> List(Element(a)) {
   ]
 }
 
-fn view_login(model: Model) -> List(Element(Msg)) {
-  case model {
-    LoggedIn(data: LoggedInModel(user:), ..) -> [
-      html.p([], [
-        html.text(
-          "You are already signed in as " <> user.name <> ". Would you like to ",
-        ),
-        html.a([href_private(AuthLogout)], [html.text("sign out")]),
-        html.text("?"),
-      ]),
-    ]
-    Anon(..) -> [
-      html.button([event.on_click(UserTriggerLogin)], [html.text("Sign in")]),
-    ]
-  }
+fn view_login() -> List(Element(Msg)) {
+  [
+    html.button([event.on_click(UserTriggerLogin)], [html.text("Sign in")]),
+  ]
 }
 
 fn view_404(uri: Uri) -> List(Element(Msg)) {
