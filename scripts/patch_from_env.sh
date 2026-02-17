@@ -18,3 +18,4 @@ sed --in-place "s|SUBSTITUTE_PUBLIC_SUPABASE_KEY|${PUBLIC_SUPABASE_KEY}|g" "$1/b
 # I really wish lustre had an option for this
 sed --in-place "s|/bagofholding.css|/${BASE_PATH}/bagofholding.css|" "$1/index.html"
 sed --in-place "s|/bagofholding.js|/${BASE_PATH}/bagofholding.js|" "$1/index.html"
+

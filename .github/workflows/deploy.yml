@@ -2,7 +2,10 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: 'main'
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions: {}
 
 jobs:
   build_site:
@@ -10,39 +13,41 @@ jobs:
     environment: github-pages
     permissions:
       contents: read
-      
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+      - name: Install nix
+        uses: cachix/install-nix-action@v31.9.1
+
+      - name: Restore and save Nix store
+        uses: nix-community/cache-nix-action@v7
         with:
-          version: 9
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
 
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-         node-version: 23
-         cache: pnpm
+      - name: Build site
+        run: nix build --print-build-logs
 
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: build
-        env:
-         BASE_PATH: '/${{ github.event.repository.name }}'
-         PUBLIC_SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL }}
-         PUBLIC_SUPABASE_KEY: ${{ vars.PUBLIC_SUPABASE_KEY }}
+      - name: Make result mutable
         run: |
-         pnpm run build
-          
+          mkdir gh-pages/
+          cp -r result/** gh-pages/
+          chmod -R u+w gh-pages/
+
+      - name: Patch environment variables
+        env:
+          BASE_PATH: "/${{ github.event.repository.name }}"
+          PUBLIC_SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL }}
+          PUBLIC_SUPABASE_KEY: ${{ vars.PUBLIC_SUPABASE_KEY }}
+        run: |
+          ./scripts/patch_from_env.sh gh-pages/
 
       - name: Upload Artifacts
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
-         # this should match the `pages` option in your adapter-static options
-         path: 'build/'
+          path: "gh-pages/"
 
   deploy:
     needs: build_site
