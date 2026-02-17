@@ -1,7 +1,7 @@
 import gleam/string
 import gleam/uri.{type Uri}
 import lustre
-import lustre/attribute.{type Attribute}
+import lustre/attribute.{type Attribute, class}
 import lustre/effect.{type Effect}
 import lustre/element.{type Element}
 import lustre/element/html
@@ -185,7 +185,7 @@ fn view(model: Model) -> Element(Msg) {
 fn with_header(model: Model, body: List(Element(a))) -> Element(a) {
   html.div([], [
     html.nav(
-      [attribute.class("auto flex flex-row-reversed pb-2 pl-4 pr-4 pt-2")],
+      [class("auto flex flex-row-reversed pb-2 pl-4 pr-4 pt-2")],
       case model {
         Anon(route: _) -> [
           html.a([href_public(AuthLogin)], [html.text("Log in")]),
@@ -196,7 +196,7 @@ fn with_header(model: Model, body: List(Element(a))) -> Element(a) {
         ]
       },
     ),
-    html.hr([attribute.class("mb-2 ml-2 mr-2")]),
-    html.main([attribute.class("p-2")], body),
+    html.hr([class("mb-2 ml-2 mr-2")]),
+    html.main([class("p-2")], body),
   ])
 }
