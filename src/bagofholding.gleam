@@ -15,8 +15,16 @@ pub fn main() -> Nil {
 }
 
 type Model {
-  Anon(route: Route)
-  LoggedIn(route: Route, user: User)
+  Anon(route: Route, data: PublicModel)
+  LoggedIn(route: Route, data: LoggedInModel)
+}
+
+type PublicModel {
+  PublicModel
+}
+
+type LoggedInModel {
+  LoggedInModel(user: User)
 }
 
 type User {
@@ -32,7 +40,7 @@ fn init(_: a) -> #(Model, Effect(Msg)) {
     Error(_) -> Index |> Public
   }
 
-  let model = Anon(route:)
+  let model = Anon(route, PublicModel)
 
   let effect =
     // We need to initialise modem in order for it to intercept links. To do that
@@ -168,7 +176,7 @@ type Msg {
 
 fn navigate(old_state model: Model, to route: Route) -> #(Model, Effect(Msg)) {
   let new_model = case model {
-    Anon(..) -> Anon(route:)
+    Anon(..) as a -> Anon(..a, route:)
     LoggedIn(..) as l -> LoggedIn(..l, route:)
   }
   #(new_model, effect.none())
@@ -192,7 +200,10 @@ fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
   case msg {
     UserNavigatedTo(route:) -> navigate(model, route)
     UserTriggerLogin -> login(model)
-    UserLoginAs(user:) -> #(LoggedIn(route: model.route, user:), effect.none())
+    UserLoginAs(user:) -> #(
+      LoggedInModel(user:) |> LoggedIn(route: model.route, data: _),
+      effect.none(),
+    )
   }
 }
 
@@ -210,10 +221,10 @@ fn with_header(model: Model, body: List(Element(a))) -> Element(a) {
     html.nav(
       [class("auto flex flex-row justify-between pb-2 pl-4 pr-4 pt-2")],
       case model {
-        Anon(route: _) -> [
+        Anon(..) -> [
           html.a([href_public(AuthLogin)], [html.text("Sign in")]),
         ]
-        LoggedIn(route: _, user: _) -> [
+        LoggedIn(..) -> [
           html.div([], [
             html.a([href_private(CollectionsList)], [html.text("Collections")]),
           ]),
@@ -233,7 +244,7 @@ fn view_index(model: Model) -> List(Element(a)) {
     html.h1([class("text-xl")], [html.text("Bag of Holding")]),
 
     case model {
-      Anon(_) ->
+      Anon(..) ->
         html.div([], [
           html.p([], [
             html.text(
@@ -247,7 +258,7 @@ fn view_index(model: Model) -> List(Element(a)) {
             html.text(" to get started."),
           ]),
         ])
-      LoggedIn(user:, ..) ->
+      LoggedIn(data: LoggedInModel(user:), ..) ->
         html.div([], [
           html.p([], [
             html.text(
@@ -269,7 +280,7 @@ fn view_index(model: Model) -> List(Element(a)) {
 
 fn view_login(model: Model) -> List(Element(Msg)) {
   case model {
-    LoggedIn(user:, ..) -> [
+    LoggedIn(data: LoggedInModel(user:), ..) -> [
       html.p([], [
         html.text(
           "You are already signed in as " <> user.name <> ". Would you like to ",
