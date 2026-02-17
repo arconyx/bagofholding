@@ -1,3 +1,4 @@
+import bagofholding/supabase
 import gleam/string
 import gleam/uri.{type Uri}
 import lustre
@@ -9,6 +10,10 @@ import lustre/event
 import modem
 
 const base_path = "SUBSTITUTE_BASE_PATH"
+
+const supabase_url = "SUBSTITUTE_PUBLIC_SUPABASE_URL"
+
+const supabase_key = "SUBSTITUTE_PUBLIC_SUPABASE_KEY"
 
 pub fn main() -> Nil {
   let app = lustre.application(init, update, view)
@@ -23,11 +28,11 @@ type Model {
 }
 
 type PublicModel {
-  PublicModel
+  PublicModel(supaclient: supabase.Client)
 }
 
 type LoggedInModel {
-  LoggedInModel(user: User)
+  LoggedInModel(supaclient: supabase.Client, user: User)
 }
 
 type User {
@@ -43,8 +48,10 @@ fn init(_: a) -> #(Model, Effect(Msg)) {
     Error(_) -> Index |> Public
   }
 
+  let supaclient = supabase.create_client(supabase_url, supabase_key)
+
   // TODO: Read login data if present
-  let model = Anon(Index, PublicModel) |> set_route(route)
+  let model = Anon(Index, PublicModel(supaclient:)) |> set_route(route)
 
   let effect =
     // We need to initialise modem in order for it to intercept links. To do that
@@ -187,13 +194,6 @@ type Msg {
   UserLoginAs(user: User)
 }
 
-fn get_route(model: Model) -> Route {
-  case model {
-    Anon(route:, ..) -> Public(route)
-    LoggedIn(route:, ..) -> route
-  }
-}
-
 fn set_route(old_model model: Model, to route: Route) -> Model {
   case model, route {
     Anon(..) as a, Public(destination) -> Anon(..a, route: destination)
@@ -208,6 +208,7 @@ fn navigate(old_model model: Model, to route: Route) -> #(Model, Effect(Msg)) {
   #(new_model, effect.none())
 }
 
+/// Trigger supabase login flow
 fn login_start(old_state model: Model) -> #(Model, Effect(Msg)) {
   case model {
     // If the user is already signed in just redirect to the collections list
@@ -222,14 +223,27 @@ fn login_start(old_state model: Model) -> #(Model, Effect(Msg)) {
   }
 }
 
+/// Switch to LoggedInModel with given user
+fn login_complete(model: Model, user: User) -> #(Model, Effect(Msg)) {
+  let #(route, supaclient) = case model {
+    Anon(route:, data: PublicModel(supaclient:)) -> #(Public(route), supaclient)
+    LoggedIn(route:, data: LoggedInModel(supaclient:, ..)) -> #(
+      route,
+      supaclient,
+    )
+  }
+
+  #(
+    LoggedInModel(supaclient:, user:) |> LoggedIn(route:, data: _),
+    effect.none(),
+  )
+}
+
 fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
   case msg {
     UserNavigatedTo(route:) -> navigate(model, route)
     UserTriggerLogin -> login_start(model)
-    UserLoginAs(user:) -> #(
-      LoggedIn(route: get_route(model), data: LoggedInModel(user:)),
-      effect.none(),
-    )
+    UserLoginAs(user:) -> login_complete(model, user)
   }
 }
 
@@ -304,7 +318,7 @@ fn view_index(model: Model) -> List(Element(a)) {
             html.text(" to get started."),
           ]),
         ])
-      LoggedIn(data: LoggedInModel(user:), ..) ->
+      LoggedIn(data: LoggedInModel(user:, ..), ..) ->
         html.div([], [
           html.p([], [
             html.text(
