@@ -20,7 +20,7 @@ type Model {
 }
 
 type User {
-  User
+  User(name: String)
 }
 
 fn init(_: a) -> #(Model, Effect(Msg)) {
@@ -179,7 +179,10 @@ fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
 }
 
 fn view(model: Model) -> Element(Msg) {
-  with_header(model, [html.text(model |> string.inspect)])
+  with_header(model, case model.route {
+    Public(Index) -> view_index(model)
+    _ -> todo
+  })
 }
 
 fn with_header(model: Model, body: List(Element(a))) -> Element(a) {
@@ -188,10 +191,10 @@ fn with_header(model: Model, body: List(Element(a))) -> Element(a) {
       [class("auto flex flex-row-reversed pb-2 pl-4 pr-4 pt-2")],
       case model {
         Anon(route: _) -> [
-          html.a([href_public(AuthLogin)], [html.text("Log in")]),
+          html.a([href_public(AuthLogin)], [html.text("Sign in")]),
         ]
         LoggedIn(route: _, user: _) -> [
-          html.a([href_private(AuthLogout)], [html.text("Log out")]),
+          html.a([href_private(AuthLogout)], [html.text("Sign out")]),
           html.a([href_private(CollectionsList)], [html.text("Collections")]),
         ]
       },
@@ -199,4 +202,43 @@ fn with_header(model: Model, body: List(Element(a))) -> Element(a) {
     html.hr([class("mb-2 ml-2 mr-2")]),
     html.main([class("p-2")], body),
   ])
+}
+
+fn view_index(model: Model) -> List(Element(a)) {
+  [
+    html.h1([class("text-xl")], [html.text("Bag of Holding")]),
+
+    case model {
+      Anon(_) ->
+        html.div([], [
+          html.p([], [
+            html.text(
+              "Welcome to the Bag of Holding, a tool to manage shared storage in Pathfinder 2e.",
+            ),
+          ]),
+          html.p([], [
+            html.a([class("text-sky-600"), href_public(AuthLogin)], [
+              html.text("Sign in"),
+            ]),
+            html.text(" to get started."),
+          ]),
+        ])
+      LoggedIn(user:, ..) ->
+        html.div([], [
+          html.p([], [
+            html.text(
+              "Welcome, "
+              <> user.name
+              <> ", to the Bag of Holding, a tool to manage shared storage in Pathfinder 2e.",
+            ),
+          ]),
+          html.p([], [
+            html.a([class("text-sky-600"), href_private(CollectionsList)], [
+              html.text("View"),
+            ]),
+            html.text(" your collections."),
+          ]),
+        ])
+    },
+  ]
 }
