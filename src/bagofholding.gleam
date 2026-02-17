@@ -1,4 +1,3 @@
-import gleam/string
 import gleam/uri.{type Uri}
 import lustre
 import lustre/attribute.{type Attribute, class}
