@@ -1,24 +1,13 @@
 # bagofholding
 
-[![Package Version](https://img.shields.io/hexpm/v/bagofholding)](https://hex.pm/packages/bagofholding)
-[![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/bagofholding/)
+This is a static site frontend for a Pathfinder 2e compatible bag of holding / shared inventory tracker.
 
-```sh
-gleam add bagofholding@1
-```
-```gleam
-import bagofholding
-
-pub fn main() -> Nil {
-  // TODO: An example of the project in use
-}
-```
-
-Further documentation can be found at <https://hexdocs.pm/bagofholding>.
+It is built with [Gleam](https://gleam.run/) and [Lustre](https://hexdocs.pm/lustre/index.html).
 
 ## Development
 
 ```sh
-gleam run   # Run the project
+gleam run -m lustre/dev start   # Run dev server
 gleam test  # Run the tests
+nix build # Production build
 ```
