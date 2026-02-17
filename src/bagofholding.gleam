@@ -7,6 +7,8 @@ import lustre/element/html
 import lustre/event
 import modem
 
+const base_path = "SUBSTITUTE_BASE_PATH"
+
 pub fn main() -> Nil {
   let app = lustre.application(init, update, view)
   let assert Ok(_) = lustre.start(app, "#app", Nil)
@@ -139,12 +141,14 @@ fn parse_route(uri: Uri) -> Route {
 /// sync with the parsing, but once you do, all links are guaranteed to work!
 ///
 fn href_public(route: PublicRoute) -> Attribute(msg) {
-  let url = case route {
-    Index -> "/"
-    AuthLogin -> "/auth/login"
-    AuthCallback -> "/auth/callback"
-    NotFound(_) -> "/404"
-  }
+  let url =
+    base_path
+    <> case route {
+      Index -> "/"
+      AuthLogin -> "/auth/login"
+      AuthCallback -> "/auth/callback"
+      NotFound(_) -> "/404"
+    }
 
   attribute.href(url)
 }
