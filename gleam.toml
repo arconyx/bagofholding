@@ -30,3 +30,13 @@ tailwindcss = "system"
 
 [tools.lustre.html]
 title = "Bag of Holding"
+# TODO: If we apply this by patching index.html can we avoid having it on every page?
+scripts = [{ content = """
+  (function() {
+    const params = new URLSearchParams(window.location.search);
+    const path = params.get('path');
+    if (path) {
+      window.history.replaceState(null, null, path);
+    }
+  })();
+""" }]
