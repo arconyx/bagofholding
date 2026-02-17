@@ -181,6 +181,7 @@ fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
 fn view(model: Model) -> Element(Msg) {
   with_header(model, case model.route {
     Public(Index) -> view_index(model)
+    Public(NotFound(uri)) -> view_404(uri)
     _ -> todo
   })
 }
@@ -240,5 +241,19 @@ fn view_index(model: Model) -> List(Element(a)) {
           ]),
         ])
     },
+  ]
+}
+
+fn view_404(uri: Uri) -> List(Element(Msg)) {
+  [
+    html.p([], [
+      html.text(
+        "No page was found for '"
+        <> uri.to_string(uri)
+        <> "'. Would you like to ",
+      ),
+      html.a([href_public(Index)], [html.text("return home")]),
+      html.text("?"),
+    ]),
   ]
 }
