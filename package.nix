@@ -10,6 +10,10 @@
   # lustre
   bun,
   tailwindcss_4,
+
+  # js dependencies
+  nodejs,
+  importNpmLock,
   ...
 }:
 let
@@ -77,9 +81,17 @@ stdenv.mkDerivation (finalAttrs: {
     bun
     tailwindcss_4
 
+    # setup node_modules
+    importNpmLock.npmConfigHook
+    nodejs
+
     # gleam dependencies
     finalAttrs.gleamDeps
   ];
+
+  npmDeps = importNpmLock {
+    npmRoot = ./.;
+  };
 
   buildPhase = ''
     mkdir -p build/packages
