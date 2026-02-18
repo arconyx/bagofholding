@@ -1,0 +1,30 @@
+name: Test
+
+on:
+    push:
+    pull_request:
+
+permissions: {}
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        environment: github-pages
+        permissions:
+            contents: read
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v6
+
+            - name: Install nix
+              uses: cachix/install-nix-action@v31.9.1
+
+            - name: Restore and save Nix store
+              uses: nix-community/cache-nix-action@v7
+              with:
+                  primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+                  restore-prefixes-first-match: nix-${{ runner.os }}-
+
+            - name: Build site
+              run: nix build --print-build-logs
