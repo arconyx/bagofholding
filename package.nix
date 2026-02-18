@@ -1,18 +1,24 @@
 {
   stdenv,
   lib,
+
+  # gleam
   gleam,
-  bun,
   erlang,
   beamPackages,
+
+  # lustre
+  bun,
   tailwindcss_4,
   ...
 }:
 let
+  # Create a file containing the contents of build/packages as created by Gleam
+  # This includes any dependencies specified in manifest.toml.
   mkGleamDeps =
     name: src: hash:
     stdenv.mkDerivation {
-      name = "${name}-deps";
+      name = "${name}-gleam-deps";
 
       nativeBuildInputs = [
         gleam
@@ -24,10 +30,17 @@ let
       buildPhase = ''
         runHook preBuild
 
+        # gleam deps download fails if it can't write to $HOME/.cache
         mkdir fake_home
         HOME=fake_home
 
         gleam deps download
+
+        # packages.toml is randomly ordered with a header row
+        awk 'NR == 1; NR > 1 {print $0 | "sort -n"}' build/packages/packages.toml > packages_sorted.toml
+        cp packages_sorted.toml build/packages/packages.toml
+
+        rm build/packages/gleam.lock
 
         runHook postBuild
       '';
@@ -35,13 +48,8 @@ let
       installPhase = ''
         runHook preInstall
 
-        awk 'NR == 1; NR > 1 {print $0 | "sort -n"}' build/packages/packages.toml > packages_sorted.toml
-        cp packages_sorted.toml build/packages/packages.toml
-
         mkdir $out
         cp -r build/packages/** $out
-
-        rm $out/gleam.lock
 
         runHook postInstall
       '';
@@ -60,18 +68,26 @@ stdenv.mkDerivation (finalAttrs: {
   gleamDepsHash = "sha256-F4huGnLmbEbU9MHc8u4yr+UavCt0KsTjilm/6wBP9yI=";
 
   nativeBuildInputs = [
-    finalAttrs.gleamDeps
+    # gleam
     gleam
     erlang
     beamPackages.rebar3
+
+    # lustre
     bun
     tailwindcss_4
+
+    # gleam dependencies
+    finalAttrs.gleamDeps
   ];
 
   buildPhase = ''
     mkdir -p build/packages
+
+    # gleam expects to be able to write to build/packages so we copy and chmod
     cp -r ${finalAttrs.gleamDeps}/** build/packages
     chmod -R u+w build/packages
+
     gleam run -m lustre/dev build --minify --outdir=dist
   '';
 
