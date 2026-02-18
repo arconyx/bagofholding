@@ -1,3 +1,4 @@
+import gleam/string
 import gleam/uri.{type Uri}
 import lustre
 import lustre/attribute.{type Attribute, class}
@@ -103,8 +104,12 @@ type CollectionId {
 }
 
 fn parse_route(uri: Uri) -> Route {
-  // TODO: Base dir
-  case uri.path_segments(uri.path) {
+  // Strip base path
+  let path = case string.starts_with(uri.path, base_path) {
+    False -> uri.path
+    True -> string.length(base_path) |> string.drop_start(uri.path, _)
+  }
+  case uri.path_segments(path) {
     [] | [""] -> Index |> Public
 
     ["auth", "login"] -> AuthLogin |> Public
@@ -154,22 +159,24 @@ fn href_public(route: PublicRoute) -> Attribute(msg) {
 }
 
 fn href_private(route: PrivateRoute) -> Attribute(msg) {
-  let url = case route {
-    AuthLogout -> "/auth/logout"
-    BagView(id:) -> "/bag/" <> id.uuid
-    BagEdit(id:) -> "/bag/" <> id.uuid <> "/edit"
-    BagDelete(id:) -> "/bag/" <> id.uuid <> "/delete"
-    BagAddItem(id:) -> "/bag/" <> id.uuid <> "/items/new"
-    CollectionView(id:) -> "/collection/" <> id.uuid
-    CollectionEdit(id:) -> "/collection/" <> id.uuid <> "/edit"
-    CollectionDelete(id:) -> "/collection/" <> id.uuid <> "/delete"
-    CollectionCreateBag(id:) -> "/collection/" <> id.uuid <> "/bags/new"
-    CollectionMembers(id:) -> "/collection/" <> id.uuid <> "/members"
-    CollectionLeave(id:) -> "/collection/" <> id.uuid <> "/members/leave"
-    CollectionsList -> "/collections"
-    CollectionsCreate -> "/collections/new"
-    UserOnboard -> "/user/onboard"
-  }
+  let url =
+    base_path
+    <> case route {
+      AuthLogout -> "/auth/logout"
+      BagView(id:) -> "/bag/" <> id.uuid
+      BagEdit(id:) -> "/bag/" <> id.uuid <> "/edit"
+      BagDelete(id:) -> "/bag/" <> id.uuid <> "/delete"
+      BagAddItem(id:) -> "/bag/" <> id.uuid <> "/items/new"
+      CollectionView(id:) -> "/collection/" <> id.uuid
+      CollectionEdit(id:) -> "/collection/" <> id.uuid <> "/edit"
+      CollectionDelete(id:) -> "/collection/" <> id.uuid <> "/delete"
+      CollectionCreateBag(id:) -> "/collection/" <> id.uuid <> "/bags/new"
+      CollectionMembers(id:) -> "/collection/" <> id.uuid <> "/members"
+      CollectionLeave(id:) -> "/collection/" <> id.uuid <> "/members/leave"
+      CollectionsList -> "/collections"
+      CollectionsCreate -> "/collections/new"
+      UserOnboard -> "/user/onboard"
+    }
 
   attribute.href(url)
 }
