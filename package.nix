@@ -69,7 +69,7 @@ stdenv.mkDerivation (finalAttrs: {
   src = lib.cleanSource ./.;
 
   gleamDeps = mkGleamDeps finalAttrs.name finalAttrs.src finalAttrs.gleamDepsHash;
-  gleamDepsHash = "sha256-F4huGnLmbEbU9MHc8u4yr+UavCt0KsTjilm/6wBP9yI=";
+  gleamDepsHash = "sha256-2bKr9seNgrl0l3i70o09qfFmKibaMEKSLhH/n0KK5Ks=";
 
   nativeBuildInputs = [
     # gleam

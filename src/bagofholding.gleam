@@ -1,4 +1,7 @@
-import bagofholding/supabase
+import bagofholding/supabase.{
+  type BagId, type CollectionId, type UserId, BagId, CollectionId,
+}
+import gleam/option.{type Option, None, Some}
 import gleam/string
 import gleam/uri.{type Uri}
 import lustre
@@ -8,6 +11,8 @@ import lustre/element.{type Element}
 import lustre/element/html
 import lustre/event
 import modem
+import plinth/browser/location
+import plinth/browser/window
 
 const base_path = "SUBSTITUTE_BASE_PATH"
 
@@ -36,7 +41,9 @@ type LoggedInModel {
 }
 
 type User {
-  User(name: String)
+  NewUser(id: UserId)
+  UnloadedUser(id: UserId)
+  NamedUser(id: UserId, name: String)
 }
 
 fn init(_: a) -> #(Model, Effect(Msg)) {
@@ -50,20 +57,38 @@ fn init(_: a) -> #(Model, Effect(Msg)) {
 
   let supaclient = supabase.create_client(supabase_url, supabase_key)
 
-  // TODO: Read login data if present
+  let auth_listener =
+    supabase.listen_to_auth_events(supaclient, fn(event, session, dispatch) {
+      case event, session {
+        supabase.InitialSession, Some(session)
+        | supabase.SignedIn, Some(session)
+        ->
+          supabase.get_user_id(session)
+          |> UserUpdateSession
+          |> dispatch
+        supabase.SignedOut, _ -> dispatch(UserSetAnon)
+        e, s -> {
+          echo #(e, s)
+          Nil
+        }
+      }
+    })
+
   let model = Anon(Index, PublicModel(supaclient:)) |> set_route(route)
 
-  let effect =
-    // We need to initialise modem in order for it to intercept links. To do that
-    // we pass in a function that takes the `Uri` of the link that was clicked and
-    // turns it into a `Msg`.
+  // We need to initialise modem in order for it to intercept links. To do that
+  // we pass in a function that takes the `Uri` of the link that was clicked and
+  // turns it into a `Msg`.
+  let modem_effect =
     modem.init(fn(uri) {
       uri
       |> parse_route
       |> UserNavigatedTo
     })
 
-  #(model, effect)
+  let effects = effect.batch([auth_listener, modem_effect])
+
+  #(model, effects)
 }
 
 type Route {
@@ -76,7 +101,7 @@ type PublicRoute {
   NotFound(uri: Uri)
 
   // TODO: Support redirect after login
-  AuthLogin
+  AuthLogin(error: Option(supabase.AuthError))
   AuthCallback
 }
 
@@ -101,15 +126,7 @@ type PrivateRoute {
   UserOnboard
 }
 
-// TODO: Use uuid type for uuids for consistent comparison and display
-type BagId {
-  BagId(uuid: String)
-}
-
-type CollectionId {
-  CollectionId(uuid: String)
-}
-
+// Keep in sync with parsing
 fn parse_route(uri: Uri) -> Route {
   // Strip base path
   let path = case string.starts_with(uri.path, base_path) {
@@ -119,7 +136,7 @@ fn parse_route(uri: Uri) -> Route {
   case uri.path_segments(path) {
     [] | [""] -> Index |> Public
 
-    ["auth", "login"] -> AuthLogin |> Public
+    ["auth", "login"] -> AuthLogin(error: None) |> Public
     ["auth", "logout"] -> AuthLogout |> Private
     ["auth", "callback"] -> AuthCallback |> Public
 
@@ -148,57 +165,69 @@ fn parse_route(uri: Uri) -> Route {
   }
 }
 
-/// We also need a way to turn a Route back into a an `href` attribute that we
-/// can then use on `html.a` elements. It is important to keep this function in
-/// sync with the parsing, but once you do, all links are guaranteed to work!
-///
-fn href_public(route: PublicRoute) -> Attribute(msg) {
-  let url =
-    base_path
-    <> case route {
-      Index -> "/"
-      AuthLogin -> "/auth/login"
-      AuthCallback -> "/auth/callback"
-      NotFound(_) -> "/404"
-    }
-
-  attribute.href(url)
+/// Keep in sync with parsing
+fn public_route_to_str(route: PublicRoute) -> String {
+  base_path
+  <> case route {
+    Index -> "/"
+    AuthLogin(_) -> "/auth/login"
+    AuthCallback -> "/auth/callback"
+    NotFound(_) -> "/404"
+  }
 }
 
-fn href_private(route: PrivateRoute) -> Attribute(msg) {
-  let url =
-    base_path
-    <> case route {
-      AuthLogout -> "/auth/logout"
-      BagView(id:) -> "/bag/" <> id.uuid
-      BagEdit(id:) -> "/bag/" <> id.uuid <> "/edit"
-      BagDelete(id:) -> "/bag/" <> id.uuid <> "/delete"
-      BagAddItem(id:) -> "/bag/" <> id.uuid <> "/items/new"
-      CollectionView(id:) -> "/collection/" <> id.uuid
-      CollectionEdit(id:) -> "/collection/" <> id.uuid <> "/edit"
-      CollectionDelete(id:) -> "/collection/" <> id.uuid <> "/delete"
-      CollectionCreateBag(id:) -> "/collection/" <> id.uuid <> "/bags/new"
-      CollectionMembers(id:) -> "/collection/" <> id.uuid <> "/members"
-      CollectionLeave(id:) -> "/collection/" <> id.uuid <> "/members/leave"
-      CollectionsList -> "/collections"
-      CollectionsCreate -> "/collections/new"
-      UserOnboard -> "/user/onboard"
-    }
+/// Keep in sync with parsing
+fn private_route_to_str(route: PrivateRoute) -> String {
+  base_path
+  <> case route {
+    AuthLogout -> "/auth/logout"
+    BagView(id:) -> "/bag/" <> id.uuid
+    BagEdit(id:) -> "/bag/" <> id.uuid <> "/edit"
+    BagDelete(id:) -> "/bag/" <> id.uuid <> "/delete"
+    BagAddItem(id:) -> "/bag/" <> id.uuid <> "/items/new"
+    CollectionView(id:) -> "/collection/" <> id.uuid
+    CollectionEdit(id:) -> "/collection/" <> id.uuid <> "/edit"
+    CollectionDelete(id:) -> "/collection/" <> id.uuid <> "/delete"
+    CollectionCreateBag(id:) -> "/collection/" <> id.uuid <> "/bags/new"
+    CollectionMembers(id:) -> "/collection/" <> id.uuid <> "/members"
+    CollectionLeave(id:) -> "/collection/" <> id.uuid <> "/members/leave"
+    CollectionsList -> "/collections"
+    CollectionsCreate -> "/collections/new"
+    UserOnboard -> "/user/onboard"
+  }
+}
 
-  attribute.href(url)
+/// Always use a valid link in hrefs but using this function
+fn href_public(route: PublicRoute) -> Attribute(msg) {
+  public_route_to_str(route) |> attribute.href()
+}
+
+/// Always use a valid link in hrefs but using this function
+fn href_private(route: PrivateRoute) -> Attribute(msg) {
+  private_route_to_str(route) |> attribute.href()
 }
 
 type Msg {
   UserNavigatedTo(route: Route)
-  UserTriggerLogin
-  UserLoginAs(user: User)
+  UserTriggerSignin
+  SigninEncounterError(err: supabase.AuthError)
+  UserUpdateSession(id: UserId)
+  UserSetName(name: Option(String))
+  UserSetAnon
+}
+
+fn get_route(model: Model) -> Route {
+  case model {
+    Anon(route:, ..) -> route |> Public
+    LoggedIn(route:, ..) -> route
+  }
 }
 
 fn set_route(old_model model: Model, to route: Route) -> Model {
   case model, route {
     Anon(..) as a, Public(destination) -> Anon(..a, route: destination)
     // TODO: Redirect after login
-    Anon(..) as a, Private(_) -> Anon(..a, route: AuthLogin)
+    Anon(..) as a, Private(_) -> Anon(..a, route: AuthLogin(error: None))
     LoggedIn(..) as l, destination -> LoggedIn(..l, route: destination)
   }
 }
@@ -213,37 +242,127 @@ fn login_start(old_state model: Model) -> #(Model, Effect(Msg)) {
   case model {
     // If the user is already signed in just redirect to the collections list
     LoggedIn(..) -> navigate(model, Private(CollectionsList))
-    Anon(..) -> #(
-      model,
-      effect.from(fn(dispatch) {
-        // TODO: Actual login logic
-        dispatch(UserLoginAs(User(name: "Test")))
-      }),
-    )
+    Anon(data: PublicModel(supaclient:), ..) -> {
+      let origin = window.self() |> window.location() |> location.origin()
+      let redirect = origin <> base_path <> public_route_to_str(AuthCallback)
+      case uri.parse(redirect) {
+        Error(_) -> #(model, effect.none())
+        Ok(redirect) -> {
+          let effect =
+            supabase.sign_in_with_oauth(
+              supaclient,
+              supabase.Discord,
+              redirect,
+              fn(result, dispatch) {
+                case result {
+                  Ok(_) -> Nil
+                  Error(e) -> e |> SigninEncounterError |> dispatch
+                }
+              },
+            )
+          #(model, effect)
+        }
+      }
+    }
   }
 }
 
 /// Switch to LoggedInModel with given user
-fn login_complete(model: Model, user: User) -> #(Model, Effect(Msg)) {
-  let #(route, supaclient) = case model {
-    Anon(route:, data: PublicModel(supaclient:)) -> #(Public(route), supaclient)
-    LoggedIn(route:, data: LoggedInModel(supaclient:, ..)) -> #(
-      route,
-      supaclient,
-    )
+fn update_user_id(model: Model, id: UserId) -> #(Model, Effect(Msg)) {
+  let get_name = fn(client) {
+    supabase.get_user_name(client, id, fn(name, dispatch) {
+      dispatch(UserSetName(name:))
+    })
   }
 
-  #(
-    LoggedInModel(supaclient:, user:) |> LoggedIn(route:, data: _),
-    effect.none(),
-  )
+  case model {
+    Anon(route:, data: PublicModel(supaclient:)) -> {
+      let new_model =
+        LoggedIn(
+          route: Public(route),
+          data: LoggedInModel(supaclient:, user: UnloadedUser(id:)),
+        )
+      #(new_model, get_name(supaclient))
+    }
+    LoggedIn(route:, data:) ->
+      case data.user.id == id {
+        // user id has not changed, nothing to update
+        True -> #(model, effect.none())
+        False -> {
+          let new_model =
+            LoggedIn(
+              route: route,
+              data: LoggedInModel(
+                supaclient: data.supaclient,
+                user: UnloadedUser(id:),
+              ),
+            )
+          #(new_model, get_name(data.supaclient))
+        }
+      }
+  }
+}
+
+// TODO: We might need to start pushing when we change the route
+fn logout(model: Model) -> #(Model, Effect(Msg)) {
+  let new_model = case model {
+    LoggedIn(route: Public(public), data: LoggedInModel(supaclient:, ..)) ->
+      Anon(route: public, data: PublicModel(supaclient:))
+    // redirect to index page if they're on an private route
+    LoggedIn(route: Private(_), data: LoggedInModel(supaclient:, ..)) ->
+      Anon(route: Index, data: PublicModel(supaclient:))
+    Anon(..) as a -> a
+  }
+  #(new_model, effect.none())
+}
+
+/// If on the login page update the model with the given error.
+/// Else do nothing.
+fn show_login_error(
+  model: Model,
+  error: supabase.AuthError,
+) -> #(Model, Effect(Msg)) {
+  case get_route(model) {
+    Public(AuthLogin(_)) -> #(
+      set_route(model, error |> Some |> AuthLogin |> Public),
+      effect.none(),
+    )
+    _ -> #(model, effect.none())
+  }
+}
+
+/// Update user name, redirecting unnamed users to onboarding
+fn update_user_name(model: Model, name: Option(String)) -> #(Model, Effect(Msg)) {
+  case model {
+    LoggedIn(route:, data:) ->
+      case name {
+        Some(name) -> #(
+          LoggedIn(
+            route:,
+            data: LoggedInModel(..data, user: NamedUser(data.user.id, name)),
+          ),
+          effect.none(),
+        )
+        None -> #(
+          LoggedIn(
+            route: Private(UserOnboard),
+            data: LoggedInModel(..data, user: NewUser(data.user.id)),
+          ),
+          effect.none(),
+        )
+      }
+    m -> #(m, effect.none())
+  }
 }
 
 fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
   case msg {
+    SigninEncounterError(err:) -> show_login_error(model, err)
     UserNavigatedTo(route:) -> navigate(model, route)
-    UserTriggerLogin -> login_start(model)
-    UserLoginAs(user:) -> login_complete(model, user)
+    UserTriggerSignin -> login_start(model)
+    UserUpdateSession(id) -> update_user_id(model, id)
+    UserSetAnon -> logout(model)
+    UserSetName(name) -> update_user_name(model, name)
   }
 }
 
@@ -257,8 +376,8 @@ fn view(model: Model) -> Element(Msg) {
 fn view_anon(model: PublicModel, route: PublicRoute) {
   case route {
     Index -> view_index(model |> Anon(route:))
-    AuthCallback -> todo
-    AuthLogin -> view_login()
+    AuthCallback -> view_auth_callback_anon(model)
+    AuthLogin(e) -> view_login(e)
     NotFound(uri) -> view_404(uri)
   }
 }
@@ -268,8 +387,8 @@ fn view_logged_in(model: LoggedInModel, route: Route) {
     Public(route) ->
       case route {
         Index -> view_index(model |> LoggedIn(route: Public(route)))
-        AuthCallback -> todo
-        AuthLogin -> view_login()
+        AuthCallback -> view_auth_callback_logged_in(model)
+        AuthLogin(e) -> view_login(e)
         NotFound(uri) -> view_404(uri)
       }
     Private(route) -> todo
@@ -282,7 +401,7 @@ fn with_header(model: Model, body: List(Element(a))) -> Element(a) {
       [class("auto flex flex-row justify-between pb-2 pl-4 pr-4 pt-2")],
       case model {
         Anon(..) -> [
-          html.a([href_public(AuthLogin)], [html.text("Sign in")]),
+          html.a([href_public(AuthLogin(None))], [html.text("Sign in")]),
         ]
         LoggedIn(..) -> [
           html.div([], [
@@ -312,19 +431,17 @@ fn view_index(model: Model) -> List(Element(a)) {
             ),
           ]),
           html.p([], [
-            html.a([class("text-sky-600"), href_public(AuthLogin)], [
+            html.a([class("text-sky-600"), href_public(AuthLogin(None))], [
               html.text("Sign in"),
             ]),
             html.text(" to get started."),
           ]),
         ])
-      LoggedIn(data: LoggedInModel(user:, ..), ..) ->
+      LoggedIn(data: LoggedInModel(..), ..) ->
         html.div([], [
           html.p([], [
             html.text(
-              "Welcome, "
-              <> user.name
-              <> ", to the Bag of Holding, a tool to manage shared storage in Pathfinder 2e.",
+              "Welcome to the Bag of Holding, a tool to manage shared storage in Pathfinder 2e.",
             ),
           ]),
           html.p([], [
@@ -338,10 +455,21 @@ fn view_index(model: Model) -> List(Element(a)) {
   ]
 }
 
-fn view_login() -> List(Element(Msg)) {
-  [
-    html.button([event.on_click(UserTriggerLogin)], [html.text("Sign in")]),
+fn view_login(error: Option(supabase.AuthError)) -> List(Element(Msg)) {
+  let std = [
+    html.button([event.on_click(UserTriggerSignin)], [html.text("Sign in")]),
   ]
+  case error {
+    Some(err) -> [
+      html.p([], [
+        html.text(
+          "A login error has occured: " <> supabase.get_auth_error_message(err),
+        ),
+      ]),
+      ..std
+    ]
+    None -> std
+  }
 }
 
 fn view_404(uri: Uri) -> List(Element(Msg)) {
@@ -352,8 +480,35 @@ fn view_404(uri: Uri) -> List(Element(Msg)) {
         <> uri.to_string(uri)
         <> "'. Would you like to ",
       ),
-      html.a([href_public(Index)], [html.text("return home")]),
+      html.a([class("text-sky-600"), href_public(Index)], [
+        html.text("return home"),
+      ]),
       html.text("?"),
+    ]),
+  ]
+}
+
+// Model parameter is for the sake of preventing calling the wrong function
+fn view_auth_callback_anon(_model: PublicModel) -> List(Element(Msg)) {
+  [
+    html.p([], [
+      html.text(
+        "You are not logged in. If you just tried to log in something went wrong. ",
+      ),
+      html.a([class("text-sky-600"), href_public(Index)], [
+        html.text("Return home."),
+      ]),
+    ]),
+  ]
+}
+
+fn view_auth_callback_logged_in(_model: LoggedInModel) -> List(Element(Msg)) {
+  [
+    html.p([], [
+      html.text("You are logged in. "),
+      html.a([class("text-sky-600"), href_public(Index)], [
+        html.text("Return home."),
+      ]),
     ]),
   ]
 }

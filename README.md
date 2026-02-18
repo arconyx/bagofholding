@@ -11,3 +11,8 @@ gleam run -m lustre/dev start   # Run dev server
 gleam test  # Run the tests
 nix build # Production build
 ```
+
+
+## Typing
+Writing typescript FFI in Gleam is a bit of a pain. We have type stubs in `types/` that have been created
+by selectively copy pasting from the typestubs gleam generates in `build/dev/javascript`.
