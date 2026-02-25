@@ -28,16 +28,16 @@ pub fn main() -> Nil {
 }
 
 type Model {
-  Anon(route: PublicRoute, data: PublicModel)
-  LoggedIn(route: Route, data: LoggedInModel)
+  Anon(route: PublicRoute, supaclient: supabase.Client, data: PublicModel)
+  LoggedIn(route: Route, supaclient: supabase.Client, data: LoggedInModel)
 }
 
 type PublicModel {
-  PublicModel(supaclient: supabase.Client)
+  PublicModel
 }
 
 type LoggedInModel {
-  LoggedInModel(supaclient: supabase.Client, user: User)
+  LoggedInModel(user: User)
 }
 
 type User {
@@ -74,7 +74,7 @@ fn init(_: a) -> #(Model, Effect(Msg)) {
       }
     })
 
-  let model = Anon(Index, PublicModel(supaclient:)) |> set_route(route)
+  let model = Anon(Index, supaclient, PublicModel) |> set_route(route)
 
   // We need to initialise modem in order for it to intercept links. To do that
   // we pass in a function that takes the `Uri` of the link that was clicked and
@@ -242,7 +242,7 @@ fn login_start(old_state model: Model) -> #(Model, Effect(Msg)) {
   case model {
     // If the user is already signed in just redirect to the collections list
     LoggedIn(..) -> navigate(model, Private(CollectionsList))
-    Anon(data: PublicModel(supaclient:), ..) -> {
+    Anon(supaclient:, ..) -> {
       let origin = window.self() |> window.location() |> location.origin()
       let redirect = origin <> base_path <> public_route_to_str(AuthCallback)
       case uri.parse(redirect) {
@@ -276,28 +276,23 @@ fn update_user_id(model: Model, id: UserId) -> #(Model, Effect(Msg)) {
   }
 
   case model {
-    Anon(route:, data: PublicModel(supaclient:)) -> {
+    Anon(route:, supaclient:, data: PublicModel) -> {
       let new_model =
         LoggedIn(
           route: Public(route),
-          data: LoggedInModel(supaclient:, user: UnloadedUser(id:)),
+          supaclient:,
+          data: LoggedInModel(user: UnloadedUser(id:)),
         )
       #(new_model, get_name(supaclient))
     }
-    LoggedIn(route:, data:) ->
-      case data.user.id == id {
+    LoggedIn(..) as lim ->
+      case lim.data.user.id == id {
         // user id has not changed, nothing to update
         True -> #(model, effect.none())
         False -> {
           let new_model =
-            LoggedIn(
-              route: route,
-              data: LoggedInModel(
-                supaclient: data.supaclient,
-                user: UnloadedUser(id:),
-              ),
-            )
-          #(new_model, get_name(data.supaclient))
+            LoggedIn(..lim, data: LoggedInModel(user: UnloadedUser(id:)))
+          #(new_model, get_name(lim.supaclient))
         }
       }
   }
@@ -306,11 +301,11 @@ fn update_user_id(model: Model, id: UserId) -> #(Model, Effect(Msg)) {
 // TODO: We might need to start pushing when we change the route
 fn logout(model: Model) -> #(Model, Effect(Msg)) {
   let new_model = case model {
-    LoggedIn(route: Public(public), data: LoggedInModel(supaclient:, ..)) ->
-      Anon(route: public, data: PublicModel(supaclient:))
+    LoggedIn(route: Public(public), supaclient:, data: LoggedInModel(..)) ->
+      Anon(route: public, supaclient:, data: PublicModel)
     // redirect to index page if they're on an private route
-    LoggedIn(route: Private(_), data: LoggedInModel(supaclient:, ..)) ->
-      Anon(route: Index, data: PublicModel(supaclient:))
+    LoggedIn(route: Private(_), supaclient:, ..) ->
+      Anon(route: Index, supaclient:, data: PublicModel)
     Anon(..) as a -> a
   }
   #(new_model, effect.none())
@@ -334,19 +329,20 @@ fn show_login_error(
 /// Update user name, redirecting unnamed users to onboarding
 fn update_user_name(model: Model, name: Option(String)) -> #(Model, Effect(Msg)) {
   case model {
-    LoggedIn(route:, data:) ->
+    LoggedIn(data:, ..) as lim ->
       case name {
         Some(name) -> #(
           LoggedIn(
-            route:,
-            data: LoggedInModel(..data, user: NamedUser(data.user.id, name)),
+            ..lim,
+            data: LoggedInModel(user: NamedUser(data.user.id, name)),
           ),
           effect.none(),
         )
         None -> #(
           LoggedIn(
+            ..lim,
             route: Private(UserOnboard),
-            data: LoggedInModel(..data, user: NewUser(data.user.id)),
+            data: LoggedInModel(user: NewUser(data.user.id)),
           ),
           effect.none(),
         )
@@ -366,16 +362,20 @@ fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
   }
 }
 
+/// Generate page state from model
+/// 
+/// This doesn't need access to the supabase client because all
+/// api calls should be triggered by effects
 fn view(model: Model) -> Element(Msg) {
   with_header(model, case model {
-    Anon(route:, data:) -> view_anon(data, route)
-    LoggedIn(route:, data:) -> view_logged_in(data, route)
+    Anon(route:, data:, ..) -> view_anon(data, route)
+    LoggedIn(route:, data:, ..) -> view_logged_in(data, route)
   })
 }
 
 fn view_anon(model: PublicModel, route: PublicRoute) {
   case route {
-    Index -> view_index(model |> Anon(route:))
+    Index -> view_index_anon(model)
     AuthCallback -> view_auth_callback_anon(model)
     AuthLogin(e) -> view_login(e)
     NotFound(uri) -> view_404(uri)
@@ -386,12 +386,13 @@ fn view_logged_in(model: LoggedInModel, route: Route) {
   case route {
     Public(route) ->
       case route {
-        Index -> view_index(model |> LoggedIn(route: Public(route)))
+        Index -> view_index_signed_in(model)
         AuthCallback -> view_auth_callback_logged_in(model)
         AuthLogin(e) -> view_login(e)
         NotFound(uri) -> view_404(uri)
       }
-    Private(route) -> todo
+    // TODO
+    Private(route) -> view_404(uri.empty)
   }
 }
 
@@ -418,40 +419,41 @@ fn with_header(model: Model, body: List(Element(a))) -> Element(a) {
   ])
 }
 
-fn view_index(model: Model) -> List(Element(a)) {
+fn view_index_anon(_model: PublicModel) {
   [
     html.h1([class("text-xl")], [html.text("Bag of Holding")]),
+    html.div([], [
+      html.p([], [
+        html.text(
+          "Welcome to the Bag of Holding, a tool to manage shared storage in Pathfinder 2e.",
+        ),
+      ]),
+      html.p([], [
+        html.a([class("text-sky-600"), href_public(AuthLogin(None))], [
+          html.text("Sign in"),
+        ]),
+        html.text(" to get started."),
+      ]),
+    ]),
+  ]
+}
 
-    case model {
-      Anon(..) ->
-        html.div([], [
-          html.p([], [
-            html.text(
-              "Welcome to the Bag of Holding, a tool to manage shared storage in Pathfinder 2e.",
-            ),
-          ]),
-          html.p([], [
-            html.a([class("text-sky-600"), href_public(AuthLogin(None))], [
-              html.text("Sign in"),
-            ]),
-            html.text(" to get started."),
-          ]),
-        ])
-      LoggedIn(data: LoggedInModel(..), ..) ->
-        html.div([], [
-          html.p([], [
-            html.text(
-              "Welcome to the Bag of Holding, a tool to manage shared storage in Pathfinder 2e.",
-            ),
-          ]),
-          html.p([], [
-            html.a([class("text-sky-600"), href_private(CollectionsList)], [
-              html.text("View"),
-            ]),
-            html.text(" your collections."),
-          ]),
-        ])
-    },
+fn view_index_signed_in(_model: LoggedInModel) -> List(Element(a)) {
+  [
+    html.h1([class("text-xl")], [html.text("Bag of Holding")]),
+    html.div([], [
+      html.p([], [
+        html.text(
+          "Welcome to the Bag of Holding, a tool to manage shared storage in Pathfinder 2e.",
+        ),
+      ]),
+      html.p([], [
+        html.a([class("text-sky-600"), href_private(CollectionsList)], [
+          html.text("View"),
+        ]),
+        html.text(" your collections."),
+      ]),
+    ]),
   ]
 }
 
