@@ -46,7 +46,10 @@ type User {
   NamedUser(id: UserId, name: String)
 }
 
-fn init(_: a) -> #(Model, Effect(Msg)) {
+type LustreUpdate =
+  #(Model, Effect(Msg))
+
+fn init(_: a) -> LustreUpdate {
   // The server for a typical SPA will often serve the application to *any*
   // HTTP request, and let the app itself determine what to show. Modem stores
   // the first URL so we can parse it for the app's initial route.
@@ -232,13 +235,13 @@ fn set_route(old_model model: Model, to route: Route) -> Model {
   }
 }
 
-fn navigate(old_model model: Model, to route: Route) -> #(Model, Effect(Msg)) {
+fn navigate(old_model model: Model, to route: Route) -> LustreUpdate {
   let new_model = set_route(model, route)
   #(new_model, effect.none())
 }
 
 /// Trigger supabase login flow
-fn login_start(old_state model: Model) -> #(Model, Effect(Msg)) {
+fn login_start(old_state model: Model) -> LustreUpdate {
   case model {
     // If the user is already signed in just redirect to the collections list
     LoggedIn(..) -> navigate(model, Private(CollectionsList))
@@ -268,7 +271,7 @@ fn login_start(old_state model: Model) -> #(Model, Effect(Msg)) {
 }
 
 /// Switch to LoggedInModel with given user
-fn update_user_id(model: Model, id: UserId) -> #(Model, Effect(Msg)) {
+fn update_user_id(model: Model, id: UserId) -> LustreUpdate {
   let get_name = fn(client) {
     supabase.get_user_name(client, id, fn(name, dispatch) {
       dispatch(UserSetName(name:))
@@ -299,7 +302,7 @@ fn update_user_id(model: Model, id: UserId) -> #(Model, Effect(Msg)) {
 }
 
 // TODO: We might need to start pushing when we change the route
-fn logout(model: Model) -> #(Model, Effect(Msg)) {
+fn logout(model: Model) -> LustreUpdate {
   let new_model = case model {
     LoggedIn(route: Public(public), supaclient:, data: LoggedInModel(..)) ->
       Anon(route: public, supaclient:, data: PublicModel)
@@ -313,10 +316,7 @@ fn logout(model: Model) -> #(Model, Effect(Msg)) {
 
 /// If on the login page update the model with the given error.
 /// Else do nothing.
-fn show_login_error(
-  model: Model,
-  error: supabase.AuthError,
-) -> #(Model, Effect(Msg)) {
+fn show_login_error(model: Model, error: supabase.AuthError) -> LustreUpdate {
   case get_route(model) {
     Public(AuthLogin(_)) -> #(
       set_route(model, error |> Some |> AuthLogin |> Public),
@@ -327,7 +327,7 @@ fn show_login_error(
 }
 
 /// Update user name, redirecting unnamed users to onboarding
-fn update_user_name(model: Model, name: Option(String)) -> #(Model, Effect(Msg)) {
+fn update_user_name(model: Model, name: Option(String)) -> LustreUpdate {
   case model {
     LoggedIn(data:, ..) as lim ->
       case name {
@@ -351,7 +351,7 @@ fn update_user_name(model: Model, name: Option(String)) -> #(Model, Effect(Msg))
   }
 }
 
-fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
+fn update(model: Model, msg: Msg) -> LustreUpdate {
   case msg {
     SigninEncounterError(err:) -> show_login_error(model, err)
     UserNavigatedTo(route:) -> navigate(model, route)
