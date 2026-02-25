@@ -95,7 +95,9 @@ fn get_route(model: Model) -> Route {
   }
 }
 
-fn set_route(old_model model: Model, to route: Route) -> Model {
+/// This is dangerous because it changes the page without updating the url
+/// TODO: Remove
+fn set_route_dangerously(old_model model: Model, to route: Route) -> Model {
   case model, route {
     Anon(..) as a, Public(destination) -> Anon(..a, route: destination)
     // TODO: Redirect after login
@@ -216,7 +218,8 @@ fn init(_: a) -> LustreUpdate {
       }
     })
 
-  let model = Anon(Index, supaclient, PublicModel) |> set_route(route)
+  let model =
+    Anon(Index, supaclient, PublicModel) |> set_route_dangerously(route)
 
   // We need to initialise modem in order for it to intercept links. To do that
   // we pass in a function that takes the `Uri` of the link that was clicked and
@@ -245,7 +248,7 @@ type Msg {
 }
 
 fn update_route(old_model model: Model, to route: Route) -> LustreUpdate {
-  let new_model = set_route(model, route)
+  let new_model = set_route_dangerously(model, route)
   #(new_model, effect.none())
 }
 
@@ -331,7 +334,7 @@ fn update_show_login_error(
 ) -> LustreUpdate {
   case get_route(model) {
     Public(AuthLogin(_)) -> #(
-      set_route(model, error |> Some |> AuthLogin |> Public),
+      set_route_dangerously(model, error |> Some |> AuthLogin |> Public),
       effect.none(),
     )
     _ -> #(model, effect.none())
