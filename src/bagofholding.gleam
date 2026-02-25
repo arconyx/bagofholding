@@ -14,11 +14,16 @@ import modem
 import plinth/browser/location
 import plinth/browser/window
 
+// CONSTANTS -------------------------------------------------------------
+// These are updated by a postprocessing script during build
+
 const base_path = "SUBSTITUTE_BASE_PATH"
 
 const supabase_url = "SUBSTITUTE_PUBLIC_SUPABASE_URL"
 
 const supabase_key = "SUBSTITUTE_PUBLIC_SUPABASE_KEY"
+
+// MAIN -------------------------------------------------------------------
 
 pub fn main() -> Nil {
   let app = lustre.application(init, update, view)
@@ -26,6 +31,8 @@ pub fn main() -> Nil {
 
   Nil
 }
+
+// MODELS ----------------------------------------------------------------
 
 type Model {
   Anon(route: PublicRoute, supaclient: supabase.Client, data: PublicModel)
@@ -44,54 +51,6 @@ type User {
   NewUser(id: UserId)
   UnloadedUser(id: UserId)
   NamedUser(id: UserId, name: String)
-}
-
-type LustreUpdate =
-  #(Model, Effect(Msg))
-
-fn init(_: a) -> LustreUpdate {
-  // The server for a typical SPA will often serve the application to *any*
-  // HTTP request, and let the app itself determine what to show. Modem stores
-  // the first URL so we can parse it for the app's initial route.
-  let route = case modem.initial_uri() {
-    Ok(uri) -> parse_route(uri)
-    Error(_) -> Index |> Public
-  }
-
-  let supaclient = supabase.create_client(supabase_url, supabase_key)
-
-  let auth_listener =
-    supabase.listen_to_auth_events(supaclient, fn(event, session, dispatch) {
-      case event, session {
-        supabase.InitialSession, Some(session)
-        | supabase.SignedIn, Some(session)
-        ->
-          supabase.get_user_id(session)
-          |> UserUpdateSession
-          |> dispatch
-        supabase.SignedOut, _ -> dispatch(UserSetAnon)
-        e, s -> {
-          echo #(e, s)
-          Nil
-        }
-      }
-    })
-
-  let model = Anon(Index, supaclient, PublicModel) |> set_route(route)
-
-  // We need to initialise modem in order for it to intercept links. To do that
-  // we pass in a function that takes the `Uri` of the link that was clicked and
-  // turns it into a `Msg`.
-  let modem_effect =
-    modem.init(fn(uri) {
-      uri
-      |> parse_route
-      |> UserNavigatedTo
-    })
-
-  let effects = effect.batch([auth_listener, modem_effect])
-
-  #(model, effects)
 }
 
 type Route {
@@ -127,6 +86,22 @@ type PrivateRoute {
   CollectionsCreate
 
   UserOnboard
+}
+
+fn get_route(model: Model) -> Route {
+  case model {
+    Anon(route:, ..) -> route |> Public
+    LoggedIn(route:, ..) -> route
+  }
+}
+
+fn set_route(old_model model: Model, to route: Route) -> Model {
+  case model, route {
+    Anon(..) as a, Public(destination) -> Anon(..a, route: destination)
+    // TODO: Redirect after login
+    Anon(..) as a, Private(_) -> Anon(..a, route: AuthLogin(error: None))
+    LoggedIn(..) as l, destination -> LoggedIn(..l, route: destination)
+  }
 }
 
 // Keep in sync with parsing
@@ -210,6 +185,56 @@ fn href_private(route: PrivateRoute) -> Attribute(msg) {
   private_route_to_str(route) |> attribute.href()
 }
 
+type LustreUpdate =
+  #(Model, Effect(Msg))
+
+fn init(_: a) -> LustreUpdate {
+  // The server for a typical SPA will often serve the application to *any*
+  // HTTP request, and let the app itself determine what to show. Modem stores
+  // the first URL so we can parse it for the app's initial route.
+  let route = case modem.initial_uri() {
+    Ok(uri) -> parse_route(uri)
+    Error(_) -> Index |> Public
+  }
+
+  let supaclient = supabase.create_client(supabase_url, supabase_key)
+
+  let auth_listener =
+    supabase.listen_to_auth_events(supaclient, fn(event, session, dispatch) {
+      case event, session {
+        supabase.InitialSession, Some(session)
+        | supabase.SignedIn, Some(session)
+        ->
+          supabase.get_user_id(session)
+          |> UserUpdateSession
+          |> dispatch
+        supabase.SignedOut, _ -> dispatch(UserSetAnon)
+        e, s -> {
+          echo #(e, s)
+          Nil
+        }
+      }
+    })
+
+  let model = Anon(Index, supaclient, PublicModel) |> set_route(route)
+
+  // We need to initialise modem in order for it to intercept links. To do that
+  // we pass in a function that takes the `Uri` of the link that was clicked and
+  // turns it into a `Msg`.
+  let modem_effect =
+    modem.init(fn(uri) {
+      uri
+      |> parse_route
+      |> UserNavigatedTo
+    })
+
+  let effects = effect.batch([auth_listener, modem_effect])
+
+  #(model, effects)
+}
+
+// UPDATES -------------------------------------------------------------------------
+
 type Msg {
   UserNavigatedTo(route: Route)
   UserTriggerSignin
@@ -217,22 +242,6 @@ type Msg {
   UserUpdateSession(id: UserId)
   UserSetName(name: Option(String))
   UserSetAnon
-}
-
-fn get_route(model: Model) -> Route {
-  case model {
-    Anon(route:, ..) -> route |> Public
-    LoggedIn(route:, ..) -> route
-  }
-}
-
-fn set_route(old_model model: Model, to route: Route) -> Model {
-  case model, route {
-    Anon(..) as a, Public(destination) -> Anon(..a, route: destination)
-    // TODO: Redirect after login
-    Anon(..) as a, Private(_) -> Anon(..a, route: AuthLogin(error: None))
-    LoggedIn(..) as l, destination -> LoggedIn(..l, route: destination)
-  }
 }
 
 fn navigate(old_model model: Model, to route: Route) -> LustreUpdate {
@@ -361,6 +370,8 @@ fn update(model: Model, msg: Msg) -> LustreUpdate {
     UserSetName(name) -> update_user_name(model, name)
   }
 }
+
+// VIEW -------------------------------------------------------------
 
 /// Generate page state from model
 /// 
