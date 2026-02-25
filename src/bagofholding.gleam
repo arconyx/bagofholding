@@ -1,6 +1,8 @@
 import bagofholding/supabase.{
   type BagId, type CollectionId, type UserId, BagId, CollectionId,
 }
+import gleam/bool
+import gleam/javascript/promise
 import gleam/option.{type Option, None, Some}
 import gleam/string
 import gleam/uri.{type Uri}
@@ -92,17 +94,6 @@ fn get_route(model: Model) -> Route {
   case model {
     Anon(route:, ..) -> route |> Public
     LoggedIn(route:, ..) -> route
-  }
-}
-
-/// This is dangerous because it changes the page without updating the url
-/// TODO: Remove
-fn set_route_dangerously(old_model model: Model, to route: Route) -> Model {
-  case model, route {
-    Anon(..) as a, Public(destination) -> Anon(..a, route: destination)
-    // TODO: Redirect after login
-    Anon(..) as a, Private(_) -> Anon(..a, route: AuthLogin(error: None))
-    LoggedIn(..) as l, destination -> LoggedIn(..l, route: destination)
   }
 }
 
@@ -218,8 +209,22 @@ fn init(_: a) -> LustreUpdate {
       }
     })
 
-  let model =
-    Anon(Index, supaclient, PublicModel) |> set_route_dangerously(route)
+  let #(model, restore_effect) = case route {
+    Public(public) -> Anon(public, supaclient, PublicModel) |> no_effect()
+    Private(private) -> #(
+      Anon(Index, supaclient, PublicModel),
+      effect.from(fn(dispatch) {
+        promise.map(supabase.get_session(supaclient), fn(session) {
+          case session {
+            Ok(Some(session)) ->
+              InternalRestoreRoute(session, private) |> dispatch
+            _ -> Nil
+          }
+        })
+        Nil
+      }),
+    )
+  }
 
   // We need to initialise modem in order for it to intercept links. To do that
   // we pass in a function that takes the `Uri` of the link that was clicked and
@@ -228,10 +233,10 @@ fn init(_: a) -> LustreUpdate {
     modem.init(fn(uri) {
       uri
       |> parse_route
-      |> UserNavigatedTo
+      |> UserNavigateTo
     })
 
-  let effects = effect.batch([auth_listener, modem_effect])
+  let effects = effect.batch([auth_listener, modem_effect, restore_effect])
 
   #(model, effects)
 }
@@ -239,7 +244,9 @@ fn init(_: a) -> LustreUpdate {
 // UPDATES -------------------------------------------------------------------------
 
 type Msg {
-  UserNavigatedTo(route: Route)
+  // Load session and silently return to given route
+  InternalRestoreRoute(session: supabase.Session, route: PrivateRoute)
+  UserNavigateTo(route: Route)
   UserTriggerSignin
   SigninEncounterError(err: supabase.AuthError)
   UserUpdateSession(id: UserId)
@@ -247,9 +254,66 @@ type Msg {
   UserSetAnon
 }
 
+fn no_effect(model: Model) -> LustreUpdate {
+  #(model, effect.none())
+}
+
+fn push_route(route: Route) -> Effect(Msg) {
+  modem.push(
+    case route {
+      Public(route) -> public_route_to_str(route)
+      Private(route) -> private_route_to_str(route)
+    },
+    None,
+    None,
+  )
+}
+
+/// Updates route in the model and pushes the new page to the stack
+/// 
+/// Anonymous users accessing private routes are redirected to the home page.
 fn update_route(old_model model: Model, to route: Route) -> LustreUpdate {
-  let new_model = set_route_dangerously(model, route)
-  #(new_model, effect.none())
+  // Abort if the route is unchanged
+  use <- bool.guard(get_route(model) == route, no_effect(model))
+
+  case model, route {
+    Anon(..) as a, Public(public) -> #(
+      Anon(..a, route: public),
+      push_route(Public(public)),
+    )
+    Anon(..) as a, Private(_) -> #(
+      Anon(..a, route: Index),
+      push_route(Public(Index)),
+    )
+    LoggedIn(..) as l, route -> #(LoggedIn(..l, route:), push_route(route))
+  }
+}
+
+/// If the user triggered init on a private page then we need to load
+/// the session before restoring their route by rewriting history.
+/// This message is triggered once the session is loaded and only affects
+/// users if they're still on the home page.
+/// 
+/// Restoring route on public pages is handled directly in the init function
+fn update_restore_route(
+  model: Model,
+  session: supabase.Session,
+  route: PrivateRoute,
+) -> LustreUpdate {
+  case get_route(model) {
+    Public(Index) -> {
+      let #(model, name_update) =
+        supabase.get_user_id(session) |> update_user_id(model, _)
+      #(
+        model,
+        effect.batch([
+          name_update,
+          modem.replace(private_route_to_str(route), None, None),
+        ]),
+      )
+    }
+    _ -> no_effect(model)
+  }
 }
 
 /// Trigger supabase login flow
@@ -313,17 +377,17 @@ fn update_user_id(model: Model, id: UserId) -> LustreUpdate {
   }
 }
 
-// TODO: We might need to start pushing when we change the route
 fn update_logout(model: Model) -> LustreUpdate {
-  let new_model = case model {
+  case model {
     LoggedIn(route: Public(public), supaclient:, data: LoggedInModel(..)) ->
-      Anon(route: public, supaclient:, data: PublicModel)
+      Anon(route: public, supaclient:, data: PublicModel) |> no_effect()
     // redirect to index page if they're on an private route
-    LoggedIn(route: Private(_), supaclient:, ..) ->
-      Anon(route: Index, supaclient:, data: PublicModel)
-    Anon(..) as a -> a
+    LoggedIn(route: Private(_), supaclient:, ..) -> #(
+      Anon(route: Index, supaclient:, data: PublicModel),
+      push_route(Public(Index)),
+    )
+    Anon(..) as a -> a |> no_effect()
   }
-  #(new_model, effect.none())
 }
 
 /// If on the login page update the model with the given error.
@@ -332,12 +396,15 @@ fn update_show_login_error(
   model: Model,
   error: supabase.AuthError,
 ) -> LustreUpdate {
-  case get_route(model) {
-    Public(AuthLogin(_)) -> #(
-      set_route_dangerously(model, error |> Some |> AuthLogin |> Public),
+  case model, get_route(model) {
+    Anon(..) as a, Public(AuthLogin(_)) -> #(
+      // This updates the route without triggering navigate
+      // it is ok because we check the route is unchanged
+      // and thus the url doesn't need to change
+      Anon(..a, route: AuthLogin(error: Some(error))),
       effect.none(),
     )
-    _ -> #(model, effect.none())
+    _, _ -> #(model, effect.none())
   }
 }
 
@@ -368,8 +435,10 @@ fn update_user_name(model: Model, name: Option(String)) -> LustreUpdate {
 
 fn update(model: Model, msg: Msg) -> LustreUpdate {
   case msg {
+    InternalRestoreRoute(session:, route:) ->
+      update_restore_route(model, session, route)
     SigninEncounterError(err:) -> update_show_login_error(model, err)
-    UserNavigatedTo(route:) -> update_route(model, route)
+    UserNavigateTo(route:) -> update_route(model, route)
     UserTriggerSignin -> update_begin_login(model)
     UserUpdateSession(id) -> update_user_id(model, id)
     UserSetAnon -> update_logout(model)
