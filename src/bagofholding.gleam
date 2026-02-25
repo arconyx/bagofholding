@@ -55,6 +55,14 @@ type User {
   NamedUser(id: UserId, name: String)
 }
 
+fn get_user_name(user: User) {
+  case user {
+    NewUser(..) -> "New User"
+    UnloadedUser(..) -> "Profile"
+    NamedUser(name:, ..) -> name
+  }
+}
+
 type Route {
   Public(PublicRoute)
   Private(PrivateRoute)
@@ -490,11 +498,12 @@ fn with_header(model: Model, body: List(Element(a))) -> Element(a) {
         Anon(..) -> [
           html.a([href_public(AuthLogin(None))], [html.text("Sign in")]),
         ]
-        LoggedIn(..) -> [
+        LoggedIn(data: LoggedInModel(user:), ..) -> [
           html.div([], [
             html.a([href_private(CollectionsList)], [html.text("Collections")]),
           ]),
-          html.div([], [
+          html.div([class("flex flex-row gap-x-2")], [
+            html.span([], [html.text(get_user_name(user))]),
             html.a([href_private(AuthLogout)], [html.text("Sign out")]),
           ]),
         ]
