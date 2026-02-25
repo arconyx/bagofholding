@@ -244,16 +244,16 @@ type Msg {
   UserSetAnon
 }
 
-fn navigate(old_model model: Model, to route: Route) -> LustreUpdate {
+fn update_route(old_model model: Model, to route: Route) -> LustreUpdate {
   let new_model = set_route(model, route)
   #(new_model, effect.none())
 }
 
 /// Trigger supabase login flow
-fn login_start(old_state model: Model) -> LustreUpdate {
+fn update_begin_login(old_state model: Model) -> LustreUpdate {
   case model {
     // If the user is already signed in just redirect to the collections list
-    LoggedIn(..) -> navigate(model, Private(CollectionsList))
+    LoggedIn(..) -> update_route(model, Private(CollectionsList))
     Anon(supaclient:, ..) -> {
       let origin = window.self() |> window.location() |> location.origin()
       let redirect = origin <> base_path <> public_route_to_str(AuthCallback)
@@ -311,7 +311,7 @@ fn update_user_id(model: Model, id: UserId) -> LustreUpdate {
 }
 
 // TODO: We might need to start pushing when we change the route
-fn logout(model: Model) -> LustreUpdate {
+fn update_logout(model: Model) -> LustreUpdate {
   let new_model = case model {
     LoggedIn(route: Public(public), supaclient:, data: LoggedInModel(..)) ->
       Anon(route: public, supaclient:, data: PublicModel)
@@ -325,7 +325,10 @@ fn logout(model: Model) -> LustreUpdate {
 
 /// If on the login page update the model with the given error.
 /// Else do nothing.
-fn show_login_error(model: Model, error: supabase.AuthError) -> LustreUpdate {
+fn update_show_login_error(
+  model: Model,
+  error: supabase.AuthError,
+) -> LustreUpdate {
   case get_route(model) {
     Public(AuthLogin(_)) -> #(
       set_route(model, error |> Some |> AuthLogin |> Public),
@@ -362,11 +365,11 @@ fn update_user_name(model: Model, name: Option(String)) -> LustreUpdate {
 
 fn update(model: Model, msg: Msg) -> LustreUpdate {
   case msg {
-    SigninEncounterError(err:) -> show_login_error(model, err)
-    UserNavigatedTo(route:) -> navigate(model, route)
-    UserTriggerSignin -> login_start(model)
+    SigninEncounterError(err:) -> update_show_login_error(model, err)
+    UserNavigatedTo(route:) -> update_route(model, route)
+    UserTriggerSignin -> update_begin_login(model)
     UserUpdateSession(id) -> update_user_id(model, id)
-    UserSetAnon -> logout(model)
+    UserSetAnon -> update_logout(model)
     UserSetName(name) -> update_user_name(model, name)
   }
 }
