@@ -92,3 +92,13 @@ export async function get_user_name(client: Client, user_id: string): Promise<Re
 export function get_error_message(err: AuthError): string {
     return err.message
 }
+
+export async function get_collections_list(client: Client): Promise<Result<string[][], PostgrestError>> {
+    const query = await client.from("collections").select("id,name")
+    let r = wrap_result(query)
+    return map(r, (obj) => {
+        return obj.map((value) => {
+            return [value.id, value.name]
+        })
+    })
+}

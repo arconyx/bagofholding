@@ -1,5 +1,8 @@
+import gleam/javascript/array
 import gleam/javascript/promise.{type Promise}
+import gleam/list
 import gleam/option.{type Option}
+import gleam/pair
 import gleam/result
 import gleam/uri
 import lustre/effect
@@ -154,6 +157,30 @@ pub fn get_user_name(
     use name <- promise.map(get_user_name_unwrapped(client, user_id.uuid))
     case name {
       Ok(name) -> then(name, dispatch)
+      Error(_e) -> Nil
+    }
+  }
+  Nil
+}
+
+@external(javascript, "./supabase_ffi.ts", "get_collections_list")
+fn get_collections_list(
+  client: Client,
+) -> Promise(Result(array.Array(#(String, String)), PostgrestError))
+
+pub fn get_collections(
+  client: Client,
+  then: fn(List(#(CollectionId, String)), fn(a) -> Nil) -> Nil,
+) -> effect.Effect(a) {
+  use dispatch <- effect.from()
+  {
+    use result <- promise.map(get_collections_list(client))
+    case result {
+      Ok(array) ->
+        array
+        |> array.to_list
+        |> list.map(pair.map_first(_, CollectionId))
+        |> then(dispatch)
       Error(_e) -> Nil
     }
   }

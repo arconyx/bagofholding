@@ -255,6 +255,9 @@ fn init(_: a) -> LustreUpdate {
 type Msg {
   // Load session and silently return to given route
   InternalRestoreRoute(session: supabase.Session, route: PrivateRoute)
+
+  PageCollectionsListSet(collections: List(#(CollectionId, String)))
+
   UserNavigateTo(route: Route)
   UserTriggerSignin
   SigninEncounterError(err: supabase.AuthError)
@@ -306,8 +309,10 @@ fn update_route(old_model model: Model, to route: Route) -> LustreUpdate {
 /// Load initial page data when state in route is empty
 fn init_page(route: PrivateRoute, client: supabase.Client) -> Effect(Msg) {
   case route {
-    // TODO
-    CollectionsList([]) -> effect.none()
+    CollectionsList([]) -> {
+      use collections, dispatch <- supabase.get_collections(client)
+      dispatch(PageCollectionsListSet(collections:))
+    }
     _ -> effect.none()
   }
 }
@@ -462,10 +467,24 @@ fn update_user_name(model: Model, name: Option(String)) -> LustreUpdate {
   }
 }
 
+fn update_set_collections(
+  model: Model,
+  collections: List(#(CollectionId, String)),
+) -> LustreUpdate {
+  case model {
+    LoggedIn(route: Private(CollectionsList(..)), ..) as l ->
+      { LoggedIn(..l, route: Private(CollectionsList(collections))) }
+      |> no_effect()
+    _ -> no_effect(model)
+  }
+}
+
 fn update(model: Model, msg: Msg) -> LustreUpdate {
   case msg {
     InternalRestoreRoute(session:, route:) ->
       update_restore_route(model, session, route)
+    PageCollectionsListSet(collections:) ->
+      update_set_collections(model, collections)
     SigninEncounterError(err:) -> update_show_login_error(model, err)
     UserNavigateTo(route:) -> update_route(model, route)
     UserTriggerSignin -> update_begin_login(model)
@@ -551,7 +570,7 @@ fn view_index_anon(_model: PublicModel) {
         ),
       ]),
       html.p([], [
-        a_public(AuthLogin(None), "Sign in"),
+        a_public_blue(AuthLogin(None), "Sign in"),
         html.text(" to get started."),
       ]),
     ]),
@@ -568,7 +587,7 @@ fn view_index_signed_in(_model: LoggedInModel) -> List(Element(Msg)) {
         ),
       ]),
       html.p([], [
-        a_private(CollectionsList([]), "View"),
+        a_private_blue(CollectionsList([]), "View"),
         html.text(" your collections."),
       ]),
     ]),
@@ -600,7 +619,7 @@ fn view_404(uri: Uri) -> List(Element(Msg)) {
         <> uri.to_string(uri)
         <> "'. Would you like to ",
       ),
-      a_public(Index, "return home"),
+      a_public_blue(Index, "return home"),
       html.text("?"),
     ]),
   ]
@@ -613,7 +632,7 @@ fn view_auth_callback_anon(_model: PublicModel) -> List(Element(Msg)) {
       html.text(
         "You are not logged in. If you just tried to log in something went wrong. ",
       ),
-      a_public(Index, "Return home."),
+      a_public_blue(Index, "Return home."),
     ]),
   ]
 }
@@ -622,7 +641,7 @@ fn view_auth_callback_logged_in(_model: LoggedInModel) -> List(Element(Msg)) {
   [
     html.p([], [
       html.text("You are logged in. "),
-      a_public(Index, "Return home."),
+      a_public_blue(Index, "Return home."),
     ]),
   ]
 }
@@ -635,9 +654,12 @@ fn view_collections_list(
     html.ul(
       [class("pb-4 pt-4 text-lg")],
       list.map(collections, fn(pair) {
-        html.li([], [a_private(CollectionView(pair.0), pair.1)])
+        html.li([], [
+          html.a([href_private(CollectionView(pair.0))], [html.text(pair.1)]),
+        ])
       }),
     ),
+    html.a([href_private(CollectionsCreate)], [html.text("New Collection")]),
   ]
 }
 
@@ -647,10 +669,10 @@ fn h1(text: String) -> Element(Msg) {
   html.h1([class("text-xl")], [html.text(text)])
 }
 
-fn a_public(route: PublicRoute, text: String) -> Element(Msg) {
+fn a_public_blue(route: PublicRoute, text: String) -> Element(Msg) {
   html.a([class("text-sky-600"), href_public(route)], [html.text(text)])
 }
 
-fn a_private(route: PrivateRoute, text: String) -> Element(Msg) {
+fn a_private_blue(route: PrivateRoute, text: String) -> Element(Msg) {
   html.a([class("text-sky-600"), href_private(route)], [html.text(text)])
 }
