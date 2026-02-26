@@ -490,7 +490,7 @@ fn view_logged_in(model: LoggedInModel, route: Route) {
   }
 }
 
-fn with_header(model: Model, body: List(Element(a))) -> Element(a) {
+fn with_header(model: Model, body: List(Element(Msg))) -> Element(Msg) {
   html.div([], [
     html.nav(
       [class("auto flex flex-row justify-between pb-2 pl-4 pr-4 pt-2")],
@@ -516,7 +516,7 @@ fn with_header(model: Model, body: List(Element(a))) -> Element(a) {
 
 fn view_index_anon(_model: PublicModel) {
   [
-    html.h1([class("text-xl")], [html.text("Bag of Holding")]),
+    h1("Bag of Holding"),
     html.div([], [
       html.p([], [
         html.text(
@@ -524,18 +524,16 @@ fn view_index_anon(_model: PublicModel) {
         ),
       ]),
       html.p([], [
-        html.a([class("text-sky-600"), href_public(AuthLogin(None))], [
-          html.text("Sign in"),
-        ]),
+        a_public(AuthLogin(None), "Sign in"),
         html.text(" to get started."),
       ]),
     ]),
   ]
 }
 
-fn view_index_signed_in(_model: LoggedInModel) -> List(Element(a)) {
+fn view_index_signed_in(_model: LoggedInModel) -> List(Element(Msg)) {
   [
-    html.h1([class("text-xl")], [html.text("Bag of Holding")]),
+    h1("Bag of Holding"),
     html.div([], [
       html.p([], [
         html.text(
@@ -543,9 +541,7 @@ fn view_index_signed_in(_model: LoggedInModel) -> List(Element(a)) {
         ),
       ]),
       html.p([], [
-        html.a([class("text-sky-600"), href_private(CollectionsList)], [
-          html.text("View"),
-        ]),
+        a_private(CollectionsList, "View"),
         html.text(" your collections."),
       ]),
     ]),
@@ -577,9 +573,7 @@ fn view_404(uri: Uri) -> List(Element(Msg)) {
         <> uri.to_string(uri)
         <> "'. Would you like to ",
       ),
-      html.a([class("text-sky-600"), href_public(Index)], [
-        html.text("return home"),
-      ]),
+      a_public(Index, "return home"),
       html.text("?"),
     ]),
   ]
@@ -592,9 +586,7 @@ fn view_auth_callback_anon(_model: PublicModel) -> List(Element(Msg)) {
       html.text(
         "You are not logged in. If you just tried to log in something went wrong. ",
       ),
-      html.a([class("text-sky-600"), href_public(Index)], [
-        html.text("Return home."),
-      ]),
+      a_public(Index, "Return home."),
     ]),
   ]
 }
@@ -603,9 +595,21 @@ fn view_auth_callback_logged_in(_model: LoggedInModel) -> List(Element(Msg)) {
   [
     html.p([], [
       html.text("You are logged in. "),
-      html.a([class("text-sky-600"), href_public(Index)], [
-        html.text("Return home."),
-      ]),
+      a_public(Index, "Return home."),
     ]),
   ]
+}
+
+// VIEW HELPERS ----------------------------------------------
+
+fn h1(text: String) -> Element(Msg) {
+  html.h1([class("text-xl")], [html.text(text)])
+}
+
+fn a_public(route: PublicRoute, text: String) -> Element(Msg) {
+  html.a([class("text-sky-600"), href_public(route)], [html.text(text)])
+}
+
+fn a_private(route: PrivateRoute, text: String) -> Element(Msg) {
+  html.a([class("text-sky-600"), href_private(route)], [html.text(text)])
 }
