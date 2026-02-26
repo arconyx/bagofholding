@@ -278,7 +278,8 @@ fn push_route(route: Route) -> Effect(Msg) {
   )
 }
 
-/// Updates route in the model and pushes the new page to the stack
+/// Updates route in the model. Does not push the new route to history
+/// unless an anon user tries to access a private page and gets redirected.
 /// 
 /// Anonymous users accessing private routes are redirected to the home page.
 fn update_route(old_model model: Model, to route: Route) -> LustreUpdate {
@@ -286,20 +287,17 @@ fn update_route(old_model model: Model, to route: Route) -> LustreUpdate {
   use <- bool.guard(get_route(model) == route, no_effect(model))
 
   case model, route {
-    Anon(..) as a, Public(public) -> #(
-      Anon(..a, route: public),
-      push_route(Public(public)),
-    )
+    Anon(..) as a, Public(public) -> #(Anon(..a, route: public), effect.none())
     Anon(..) as a, Private(_) -> #(
       Anon(..a, route: Index),
       push_route(Public(Index)),
     )
     LoggedIn(..) as l, route ->
       case route {
-        Public(..) -> #(LoggedIn(..l, route:), push_route(route))
+        Public(..) -> #(LoggedIn(..l, route:), effect.none())
         Private(private) -> #(
           LoggedIn(..l, route:),
-          effect.batch([push_route(route), init_page(private, model.supaclient)]),
+          init_page(private, model.supaclient),
         )
       }
   }
@@ -308,7 +306,8 @@ fn update_route(old_model model: Model, to route: Route) -> LustreUpdate {
 /// Load initial page data when state in route is empty
 fn init_page(route: PrivateRoute, client: supabase.Client) -> Effect(Msg) {
   case route {
-    CollectionsList([]) -> todo
+    // TODO
+    CollectionsList([]) -> effect.none()
     _ -> effect.none()
   }
 }
@@ -343,8 +342,14 @@ fn update_restore_route(
 /// Trigger supabase login flow
 fn update_begin_login(old_state model: Model) -> LustreUpdate {
   case model {
-    // If the user is already signed in just redirect to the collections list
-    LoggedIn(..) -> update_route(model, Private(CollectionsList([])))
+    // If the user is already signed in on the login page
+    // just redirect to the collections list
+    LoggedIn(route: Public(AuthLogin(..)), ..) as l -> #(
+      LoggedIn(..l, route: Private(CollectionsList([]))),
+      push_route(Private(CollectionsList([]))),
+    )
+    // If they're already signed in on another page leave them be
+    LoggedIn(..) as l -> #(l, effect.none())
     Anon(supaclient:, ..) -> {
       let origin = window.self() |> window.location() |> location.origin()
       let redirect = origin <> base_path <> public_route_to_str(AuthCallback)
@@ -410,7 +415,7 @@ fn update_logout(model: Model) -> LustreUpdate {
       Anon(route: Index, supaclient:, data: PublicModel),
       push_route(Public(Index)),
     )
-    Anon(..) as a -> a |> no_effect()
+    Anon(..) as a -> no_effect(a)
   }
 }
 
