@@ -47,3 +47,8 @@ scripts = [{ content = """
     }
   })();
 """ }]
+body = """
+  <div class="dark:bg-black dark:text-slate-400 min-w-screen min-h-screen">
+    <div id="app" class="min-w-xs"></div>
+  </div>
+"""
