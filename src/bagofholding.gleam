@@ -3,6 +3,7 @@ import bagofholding/supabase.{
 }
 import gleam/bool
 import gleam/javascript/promise
+import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/string
 import gleam/uri.{type Uri}
@@ -92,7 +93,7 @@ type PrivateRoute {
   CollectionMembers(id: CollectionId)
   CollectionLeave(id: CollectionId)
 
-  CollectionsList
+  CollectionsList(collections: List(#(CollectionId, String)))
   CollectionsCreate
 
   UserOnboard
@@ -135,7 +136,7 @@ fn parse_route(uri: Uri) -> Route {
     ["collection", id, "leave"] ->
       CollectionId(id) |> CollectionLeave |> Private
 
-    ["collections"] -> CollectionsList |> Private
+    ["collections"] -> CollectionsList([]) |> Private
     ["collections", "new"] -> CollectionsCreate |> Private
 
     ["user", "onboard"] -> UserOnboard |> Private
@@ -170,7 +171,7 @@ fn private_route_to_str(route: PrivateRoute) -> String {
     CollectionCreateBag(id:) -> "/collection/" <> id.uuid <> "/bags/new"
     CollectionMembers(id:) -> "/collection/" <> id.uuid <> "/members"
     CollectionLeave(id:) -> "/collection/" <> id.uuid <> "/members/leave"
-    CollectionsList -> "/collections"
+    CollectionsList(_) -> "/collections"
     CollectionsCreate -> "/collections/new"
     UserOnboard -> "/user/onboard"
   }
@@ -293,7 +294,22 @@ fn update_route(old_model model: Model, to route: Route) -> LustreUpdate {
       Anon(..a, route: Index),
       push_route(Public(Index)),
     )
-    LoggedIn(..) as l, route -> #(LoggedIn(..l, route:), push_route(route))
+    LoggedIn(..) as l, route ->
+      case route {
+        Public(..) -> #(LoggedIn(..l, route:), push_route(route))
+        Private(private) -> #(
+          LoggedIn(..l, route:),
+          effect.batch([push_route(route), init_page(private, model.supaclient)]),
+        )
+      }
+  }
+}
+
+/// Load initial page data when state in route is empty
+fn init_page(route: PrivateRoute, client: supabase.Client) -> Effect(Msg) {
+  case route {
+    CollectionsList([]) -> todo
+    _ -> effect.none()
   }
 }
 
@@ -328,7 +344,7 @@ fn update_restore_route(
 fn update_begin_login(old_state model: Model) -> LustreUpdate {
   case model {
     // If the user is already signed in just redirect to the collections list
-    LoggedIn(..) -> update_route(model, Private(CollectionsList))
+    LoggedIn(..) -> update_route(model, Private(CollectionsList([])))
     Anon(supaclient:, ..) -> {
       let origin = window.self() |> window.location() |> location.origin()
       let redirect = origin <> base_path <> public_route_to_str(AuthCallback)
@@ -486,7 +502,11 @@ fn view_logged_in(model: LoggedInModel, route: Route) {
         NotFound(uri) -> view_404(uri)
       }
     // TODO
-    Private(route) -> view_404(uri.empty)
+    Private(route) ->
+      case route {
+        CollectionsList(collections) -> view_collections_list(collections)
+        _ -> view_404(uri.empty)
+      }
   }
 }
 
@@ -500,7 +520,9 @@ fn with_header(model: Model, body: List(Element(Msg))) -> Element(Msg) {
         ]
         LoggedIn(data: LoggedInModel(user:), ..) -> [
           html.div([], [
-            html.a([href_private(CollectionsList)], [html.text("Collections")]),
+            html.a([href_private(CollectionsList([]))], [
+              html.text("Collections"),
+            ]),
           ]),
           html.div([class("flex flex-row gap-x-2")], [
             html.span([], [html.text(get_user_name(user))]),
@@ -541,7 +563,7 @@ fn view_index_signed_in(_model: LoggedInModel) -> List(Element(Msg)) {
         ),
       ]),
       html.p([], [
-        a_private(CollectionsList, "View"),
+        a_private(CollectionsList([]), "View"),
         html.text(" your collections."),
       ]),
     ]),
@@ -597,6 +619,20 @@ fn view_auth_callback_logged_in(_model: LoggedInModel) -> List(Element(Msg)) {
       html.text("You are logged in. "),
       a_public(Index, "Return home."),
     ]),
+  ]
+}
+
+fn view_collections_list(
+  collections: List(#(CollectionId, String)),
+) -> List(Element(Msg)) {
+  [
+    h1("Collections"),
+    html.ul(
+      [class("pb-4 pt-4 text-lg")],
+      list.map(collections, fn(pair) {
+        html.li([], [a_private(CollectionView(pair.0), pair.1)])
+      }),
+    ),
   ]
 }
 
