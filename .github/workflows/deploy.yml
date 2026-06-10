@@ -13,7 +13,7 @@ jobs:
       
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install pnpm
         uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
@@ -21,9 +21,9 @@ jobs:
           version: 9
 
       - name: Install Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-         node-version: 23
+         node-version: 24
          cache: pnpm
 
       - name: Install dependencies
@@ -39,7 +39,7 @@ jobs:
           
 
       - name: Upload Artifacts
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
          # this should match the `pages` option in your adapter-static options
          path: 'build/'
@@ -59,4 +59,4 @@ jobs:
     steps:
       - name: Deploy
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
