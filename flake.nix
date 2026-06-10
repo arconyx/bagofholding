@@ -18,9 +18,10 @@
           buildInputs = [
             pkgs.bashInteractive
             pkgs.nodejs-slim
-            pkgs.nodePackages.pnpm
-            pkgs.nodePackages.typescript
-            pkgs.nodePackages.typescript-language-server
+            pkgs.pnpm
+            pkgs.typescript
+            pkgs.typescript-language-server
+            pkgs.vitejs
           ];
         };
       });
