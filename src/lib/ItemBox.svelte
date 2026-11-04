@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import type { Tables } from '$lib/supabase';
+	import type { Tables } from '#lib/supabase.js';
 
 	interface Props {
 		item: Tables<'items'>;

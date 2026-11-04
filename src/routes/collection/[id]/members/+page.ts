@@ -1,4 +1,4 @@
-import { userState } from '$lib/state.svelte';
+import { userState } from '#lib/state.svelte.js';
 import { error } from '@sveltejs/kit';
 
 export const load = async ({ parent }) => {

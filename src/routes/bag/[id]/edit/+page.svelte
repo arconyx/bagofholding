@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { userState } from '$lib/state.svelte.js';
-	import Bag from '$lib/forms/Bag.svelte';
+	import { userState } from '#lib/state.svelte.js';
+	import Bag from '#lib/forms/Bag.svelte';
 
 	const { data } = $props();
 	const { bag, supabase } = data;

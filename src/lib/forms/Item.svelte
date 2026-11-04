@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Tables } from '$lib/supabase';
+	import type { Tables } from '#lib/supabase.js';
 	let errorMsg: string | null = $state(null);
 
 	interface Props {

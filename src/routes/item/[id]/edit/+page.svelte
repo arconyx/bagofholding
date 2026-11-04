@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto, invalidate } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import Item from '$lib/forms/Item.svelte';
+	import Item from '#lib/forms/Item.svelte';
 
 	const { data } = $props();
 	const { supabase, item } = data;

@@ -1,4 +1,4 @@
-import { convertBagToFilledBag, type FilledBag } from '$lib/schema/FilledBag.js';
+import { convertBagToFilledBag, type FilledBag } from '#lib/schema/FilledBag.js';
 import { error } from '@sveltejs/kit';
 
 export const load = async ({ parent, params }) => {

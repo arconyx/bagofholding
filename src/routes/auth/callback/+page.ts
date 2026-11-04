@@ -1,6 +1,6 @@
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
-import { getUsername } from '$lib/utils';
+import { getUsername } from '#lib/utils.js';
 
 export const ssr = false;
 export const load = async ({ parent }) => {

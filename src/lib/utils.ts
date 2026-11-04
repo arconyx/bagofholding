@@ -2,7 +2,7 @@ import type { FilledBag } from './schema/FilledBag';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
-import { userState } from '$lib/state.svelte';
+import { userState } from '#lib/state.svelte.js';
 import type { Database, Tables } from './supabase';
 
 export function purseGpEquivalent(bag: Tables<'bags'>) {

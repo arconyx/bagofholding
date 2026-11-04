@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import type { Tables } from '$lib/supabase';
+	import type { Tables } from '#lib/supabase.js';
 	let errorMsg: string | null = $state(null);
 
 	const { data } = $props();

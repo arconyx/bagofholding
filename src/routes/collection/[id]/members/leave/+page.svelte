@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { userState } from '$lib/state.svelte.js';
+	import { userState } from '#lib/state.svelte.js';
 	const { data } = $props();
 	const { collection, supabase } = data;
 	import { error } from '@sveltejs/kit';

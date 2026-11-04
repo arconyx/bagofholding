@@ -1,7 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import { resolve } from '$app/paths';
-	import { userState } from '$lib/state.svelte';
+	import { userState } from '#lib/state.svelte.js';
 	import { goto } from '$app/navigation';
 
 	let { children, data } = $props();
