@@ -1,7 +1,7 @@
-import type { User } from "@supabase/supabase-js";
+import type { User } from '@supabase/supabase-js';
 
 export interface UserState {
-    user: User | null
+	user: User | null;
 }
 
-export const userState: UserState = $state({ user: null })
+export const userState: UserState = $state({ user: null });
