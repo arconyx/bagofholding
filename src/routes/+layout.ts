@@ -1,4 +1,4 @@
-import { PUBLIC_SUPABASE_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public';
+import { PUBLIC_SUPABASE_KEY, PUBLIC_SUPABASE_URL } from '$app/env/public';
 import { createClient } from '@supabase/supabase-js';
 import type { LayoutLoad } from './$types';
 import type { Database } from '$lib/supabase';
