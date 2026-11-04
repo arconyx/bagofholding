@@ -6,7 +6,6 @@ on:
 jobs:
   build_site:
     runs-on: ubuntu-latest
-    environment: github-pages
     permissions:
       contents: read
       
