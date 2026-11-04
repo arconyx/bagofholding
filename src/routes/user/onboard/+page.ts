@@ -1,5 +1,5 @@
 import { goto } from '$app/navigation';
-import { base } from '$app/paths';
+import { resolve } from '$app/paths';
 import { error } from '@sveltejs/kit';
 
 export const ssr = false;

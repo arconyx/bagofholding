@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { base } from '$app/paths';
+	import { resolve } from '$app/paths';
 	import ItemList from '$lib/ItemList.svelte';
 	import PurseDisplay from '$lib/PurseDisplay.svelte';
 	import { userState } from '$lib/state.svelte.js';
@@ -23,19 +23,17 @@
 	{#each filledBags as bag}
 		<li class="mb-2">
 			<h2 class="text-lg">
-				<a href="{base}/bag/{bag.id}">{bag.name}</a> ({usedCapacity(bag)}/{bag.capacity})
+				<a href="{resolve('')}/bag/{bag.id}">{bag.name}</a>
+				({usedCapacity(bag)}/{bag.capacity})
 			</h2>
 			<p class="text-md">{bag.description}</p>
-			<PurseDisplay {bag} prefix="Coin: " />
+			<PurseDisplay bag={bag} prefix="Coin: " />
 			<div class="mb-4 flex gap-4 text-sm">
 				<a
-					href="{base}/bag/{bag.id}/items/new?redir={encodeURIComponent(
-						base + '/collection/' + collection.id
-					)}"
-				>
-					Add Item
-				</a>
-				<a href="{base}/bag/{bag.id}/edit/coin"> Edit Coin </a>
+					href="{resolve('')}/bag/{bag.id}/items/new?redir={encodeURIComponent(resolve('collection/') + collection.id)}"
+				>Add Item</a>
+
+				<a href="{resolve('')}/bag/{bag.id}/edit/coin">Edit Coin</a>
 			</div>
 
 			<ItemList items={bag.items} />

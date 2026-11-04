@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { base } from '$app/paths';
+	import { resolve } from '$app/paths';
 	import { userState } from '$lib/state.svelte.js';
 	import Bag from '$lib/forms/Bag.svelte';
 
@@ -8,7 +8,7 @@
 	const { bag, supabase } = data;
 
 	async function onSuccess() {
-		const url = `${base}/bag/${bag.id}`;
+		const url = resolve(`bag/${bag.id}`);
 		await goto(url);
 	}
 
@@ -30,11 +30,10 @@
 		const { error } = await supabase
 			.from('bags')
 			.update({
-				name: form.get('name') as string,
-				description: form.get('description') as string,
-				capacity: capacity
-			})
-			.eq('id', bag.id);
+			name: form.get('name') as string,
+			description: form.get('description') as string,
+			capacity
+		}).eq('id', bag.id);
 
 		if (error != null) {
 			console.error('Bag update error', error);
@@ -51,4 +50,9 @@
 
 <h1 class="text-xl">Edit Bag</h1>
 
-<Bag {bag} submitLabel="Save" {onSuccess} {submit} />
+<Bag
+	bag={bag}
+	submitLabel="Save"
+	onSuccess={onSuccess}
+	submit={submit}
+/>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { base } from '$app/paths';
+	import { resolve } from '$app/paths';
 	import { userState } from '$lib/state.svelte.js';
 	import Coin from '$lib/forms/Coin.svelte';
 
@@ -8,7 +8,7 @@
 	const { bag, supabase } = data;
 
 	async function onSuccess() {
-		const url = `${base}/bag/${bag.id}`;
+		const url = resolve(`bag/${bag.id}`);
 		await goto(url);
 	}
 
@@ -66,4 +66,9 @@
 <h1 class="text-xl">Edit Coin</h1>
 <p>For bag {bag.name}</p>
 
-<Coin {bag} submitLabel="Save" {onSuccess} {submit} />
+<Coin
+	bag={bag}
+	submitLabel="Save"
+	onSuccess={onSuccess}
+	submit={submit}
+/>

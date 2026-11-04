@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '../app.css';
-	import { base } from '$app/paths';
+	import { resolve } from '$app/paths';
 	import { userState } from '$lib/state.svelte';
 	import { goto } from '$app/navigation';
 
@@ -24,21 +24,19 @@
 				});
 			});
 
-			goto(base + '/');
+			goto(resolve(('/').slice(1)));
 		}
 	});
 </script>
 
 <nav class="auto flex flex-row pb-2 pl-4 pr-4 pt-2">
-	<a href="{base}/collections" class="flex-grow">Collections</a>
+	<a href="{resolve('')}/collections" class="flex-grow">Collections</a>
 	{#if userState.user}
-		<a href="{base}/auth/logout">Logout</a>
+		<a href="{resolve('')}/auth/logout">Logout</a>
 	{:else}
-		<a href="{base}/auth/login">Login</a>
+		<a href="{resolve('')}/auth/login">Login</a>
 	{/if}
 </nav>
-<hr class="mb-2 ml-2 mr-2" />
 
-<div class="p-2">
-	{@render children()}
-</div>
+<hr class="mb-2 ml-2 mr-2" />
+<div class="p-2">{@render children()}</div>

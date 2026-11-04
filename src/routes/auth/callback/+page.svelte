@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { base } from '$app/paths';
+	import { resolve } from '$app/paths';
 </script>
 
-<a class="text-sky-600" href="{base}/">Return home</a>
+<a class="text-sky-600" href="{resolve('')}/">Return home</a>

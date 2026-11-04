@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { goto, invalidate } from '$app/navigation';
-	import { base } from '$app/paths';
+	import { resolve } from '$app/paths';
 	import Item from '$lib/forms/Item.svelte';
 
 	const { data } = $props();
 	const { supabase, item } = data;
 
 	async function onSuccess() {
-		const url = `${base}/item/${item.id}`;
+		const url = resolve(`item/${item.id}`);
 		await invalidate(url);
 		await goto(url);
 	}
@@ -38,10 +38,10 @@
 		const { data, error: sub_error } = await supabase
 			.from('items')
 			.update({
-				name: form.get('name') as string,
-				description: form.get('description') as string,
-				quantity: quantity,
-				unit_bulk: bulk
+			name: form.get('name') as string,
+			description: form.get('description') as string,
+			quantity,
+			unit_bulk: bulk
 			})
 			.eq('id', item.id);
 
@@ -60,4 +60,10 @@
 </script>
 
 <h1 class="text-xl">Edit Item</h1>
-<Item {submit} {onSuccess} submitLabel="Save" {item} />
+
+<Item
+	submit={submit}
+	onSuccess={onSuccess}
+	submitLabel="Save"
+	item={item}
+/>

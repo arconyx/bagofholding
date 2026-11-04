@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { base } from '$app/paths';
+	import { resolve } from '$app/paths';
 	import { userState } from '$lib/state.svelte.js';
 	import Collection from '$lib/forms/Collection.svelte';
 
@@ -8,7 +8,7 @@
 	const { collection, supabase } = data;
 
 	async function onSuccess() {
-		const url = `${base}/collection/${collection.id}`;
+		const url = resolve(`collection/${collection.id}`);
 		// await invalidate(url);
 		await goto(url);
 	}
@@ -45,4 +45,9 @@
 
 <h1 class="text-xl">Edit Collection</h1>
 
-<Collection {collection} submitLabel="Save" {onSuccess} {submit} />
+<Collection
+	collection={collection}
+	submitLabel="Save"
+	onSuccess={onSuccess}
+	submit={submit}
+/>

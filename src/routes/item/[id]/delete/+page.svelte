@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { base } from '$app/paths';
+	import { resolve } from '$app/paths';
 	const { data } = $props();
 	const { item, supabase } = data;
 	import { error } from '@sveltejs/kit';
@@ -14,7 +14,7 @@
 
 		console.log('Deleted item');
 
-		goto(base + '/bag/' + item.bag_id);
+		goto(resolve('bag/') + item.bag_id);
 	}
 </script>
 

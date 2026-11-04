@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { base } from '$app/paths';
+	import { resolve } from '$app/paths';
 
 	let { data } = $props();
 </script>
@@ -8,10 +8,8 @@
 
 <ul class="pb-4 pt-4 text-lg">
 	{#each data.collections as collection}
-		<li>
-			<a href="{base}/collection/{collection.id}">{collection.name}</a>
-		</li>
+		<li><a href="{resolve('')}/collection/{collection.id}">{collection.name}</a></li>
 	{/each}
 </ul>
 
-<a href="{base}/collections/new"> New Collection </a>
+<a href="{resolve('')}/collections/new">New Collection</a>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { base } from '$app/paths';
+	import { resolve } from '$app/paths';
 	import { userState } from '$lib/state.svelte.js';
 
 	const { data } = $props();
@@ -20,11 +20,7 @@
 		// @ts-ignore
 		const form = new FormData(event.target);
 		const name = form.get('username') as string;
-
-		const { data, error } = await supabase.from('players').upsert({
-			name: name,
-			id: user.id
-		});
+		const { data, error } = await supabase.from('players').upsert({ name, id: user.id });
 
 		if (error) {
 			console.error('Unable to submit username', error, data);
@@ -32,7 +28,7 @@
 			return false;
 		}
 
-		goto(base + '/collections');
+		goto(resolve('collections'));
 		return false;
 	}
 </script>

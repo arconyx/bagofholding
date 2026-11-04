@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { base } from '$app/paths';
+	import { resolve } from '$app/paths';
 	const { data } = $props();
 	const { collection, supabase } = data;
 	import { error } from '@sveltejs/kit';
@@ -17,7 +17,7 @@
 
 		console.log('Deleted collection');
 
-		goto(base + '/collections');
+		goto(resolve('collections'));
 	}
 </script>
 
