@@ -1,7 +1,7 @@
 import type { FilledBag } from './schema/FilledBag';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { goto } from '$app/navigation';
-import { base } from '$app/paths';
+import { resolve } from '$app/paths';
 import { userState } from '$lib/state.svelte';
 import type { Database, Tables } from './supabase';
 
@@ -42,7 +42,7 @@ export async function getUsername(supabase: SupabaseClient<Database>) {
 		return true;
 	} else if (self.length == 0) {
 		console.log('New user detected, onboarding');
-		goto(base + '/user/onboard');
+		goto(resolve('user/onboard'));
 		return false;
 	} else {
 		console.error('Something went badly wrong with getting player info');

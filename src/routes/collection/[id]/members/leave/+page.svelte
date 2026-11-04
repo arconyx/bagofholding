@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { base } from '$app/paths';
+	import { resolve } from '$app/paths';
 	import { userState } from '$lib/state.svelte.js';
 	const { data } = $props();
 	const { collection, supabase } = data;
@@ -26,7 +26,7 @@
 
 		console.log('Left collection');
 
-		goto(base + '/collections');
+		goto(resolve('collections'));
 	}
 </script>
 

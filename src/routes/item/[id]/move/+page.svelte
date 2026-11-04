@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { base } from '$app/paths';
+	import { resolve } from '$app/paths';
 	import type { Tables } from '$lib/supabase';
 	let errorMsg: string | null = $state(null);
 
@@ -20,7 +20,7 @@
 			return;
 		}
 
-		await goto(base + '/bag/' + id);
+		await goto(resolve('bag/') + id);
 	}
 </script>
 

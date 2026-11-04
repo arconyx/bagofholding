@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { base } from '$app/paths';
+	import { resolve } from '$app/paths';
 	import ItemList from '$lib/ItemList.svelte';
 	import PurseDisplay from '$lib/PurseDisplay.svelte';
 	import { usedCapacity } from '$lib/utils.js';
@@ -9,15 +9,22 @@
 
 <h2 class="text-lg">{bag.name} ({usedCapacity(bag)}/{bag.capacity})</h2>
 <p class="text-md">{bag.description}</p>
-
-<PurseDisplay {bag} prefix="Funds: " />
-
+<PurseDisplay bag={bag} prefix="Funds: " />
 <ItemList items={bag.items} />
 
-<div class="mt-8 grid grid-flow-row auto-rows-min grid-cols-auto-fill-48 gap-4 text-center">
-	<a href="{base}/bag/{bag.id}/items/new?redir={encodeURIComponent('../')}"> Add Item </a>
-	<a href="{base}/bag/{bag.id}/edit/coin">Edit Coin</a>
-	<a href="{base}/collection/{bag.collection_id}">View collection</a>
+<div
+	class="mt-8 grid grid-flow-row auto-rows-min grid-cols-auto-fill-48 gap-4 text-center"
+>
+	<a
+		href="{resolve('')}/bag/{bag.id}/items/new?redir={encodeURIComponent('../')}"
+	>Add Item</a>
+
+	<a href="{resolve('')}/bag/{bag.id}/edit/coin">Edit Coin</a>
+
+	<a
+		href="{resolve('')}/collection/{bag.collection_id}"
+	>View collection</a>
+
 	<a href="{bag.id}/edit">Edit Bag</a>
 	<a href="{bag.id}/delete">Delete Bag</a>
 </div>

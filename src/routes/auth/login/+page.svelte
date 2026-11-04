@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { base } from '$app/paths';
+	import { resolve } from '$app/paths';
 
 	let { data } = $props();
 	const supabase = data.supabase;
@@ -8,9 +8,7 @@
 	async function signInWithDiscord() {
 		const { data, error } = await supabase.auth.signInWithOAuth({
 			provider: 'discord',
-			options: {
-				redirectTo: `${origin}${base}/auth/callback`
-			}
+			options: { redirectTo: `${origin}${resolve('')}/auth/callback` }
 		});
 		return;
 	}

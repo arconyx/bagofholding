@@ -1,5 +1,5 @@
 import { goto } from '$app/navigation';
-import { base } from '$app/paths';
+import { resolve } from '$app/paths';
 import { getUsername } from '$lib/utils';
 
 export const ssr = false;
@@ -8,6 +8,6 @@ export const load = async ({ parent }) => {
 	const { supabase } = await parent();
 	const hasName = await getUsername(supabase);
 	if (hasName) {
-		goto(base + '/collections');
+		goto(resolve('collections'));
 	}
 };
