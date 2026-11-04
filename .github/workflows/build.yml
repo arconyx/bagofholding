@@ -1,0 +1,38 @@
+name: Build
+
+on:
+  push:
+
+jobs:
+  build_site:
+    runs-on: ubuntu-latest
+    environment: github-pages
+    permissions:
+      contents: read
+      
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.3
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6.0.8
+        with:
+          version: 11
+
+      - name: Install Node.js
+        uses: actions/setup-node@v6.4.0
+        with:
+         node-version: 24
+         cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: build
+        env:
+         BASE_PATH: '/${{ github.event.repository.name }}'
+         # domain we control
+         PUBLIC_SUPABASE_URL: 'https://thehivemind.gay'
+         PUBLIC_SUPABASE_KEY: PLACEHOLDERKEY
+        run: |
+         pnpm run build
