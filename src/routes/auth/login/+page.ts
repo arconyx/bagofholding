@@ -1,8 +1,8 @@
-import type { PageLoad } from "./$types";
+import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ parent }) => {
-    const { supabase } = await parent();
-    return {
-        supabase: supabase
-    }
+	const { supabase } = await parent();
+	return {
+		supabase: supabase
+	};
 };

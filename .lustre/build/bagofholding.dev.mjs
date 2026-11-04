@@ -1,1 +1,2 @@
-import { main } from '../../build/dev/javascript/bagofholding/bagofholding.mjs'; main();
+import { main } from '../../build/dev/javascript/bagofholding/bagofholding.mjs';
+main();
