@@ -19,35 +19,6 @@ Also search the project for `@migration-task` comments. They may describe additi
 
 ## Migration tasks
 
-### Migrate remaining `base`, `assets`, and `resolveRoute` from `$app/paths` usages
-
-The automatic migration can leave `base`, `assets`, and `resolveRoute` usages from `$app/paths`.
-
-#### What to do
-
-The deprecated base, assets, and resolveRoute exports have been removed from $app/paths. Use asset and resolve instead:
-
-```diff
-// instead of this...
-const pathname = base + resolveRoute('/blog/[slug]', { slug });
-const file = assets + '/foo.png';
-
-// ...do this:
-const pathname = resolve('/blog/[slug]', { slug });
-const file = asset('foo.png');
-
-```
-
-The `Pathname` and `Asset` types have also been renamed to `Path` and `AssetPath`, and the leading `/` has been removed from those types — so `asset('/foo.png')` should now be `asset('foo.png')`, and pathnames passed to `resolve` no longer start with `/` (e.g. `resolve('blog/hello-world')`). Only route IDs start with `/` now.
-
-#### References
-
-- [Migrating to SvelteKit v3](https://svelte.dev/docs/kit/migrating-to-sveltekit-3#$app-paths-base-assets-and-resolveRoute-removed)
-
-#### Files to review
-
-- [ ] `src/routes/user/onboard/+page.ts`
-
 ### Review `goto` destinations
 
 `goto(...)` now rejects destinations that do not resolve to an application route.

@@ -1,5 +1,3 @@
-import { goto } from '$app/navigation';
-import { resolve } from '$app/paths';
 import { error } from '@sveltejs/kit';
 
 export const ssr = false;
@@ -13,11 +11,6 @@ export const load = async ({ parent }) => {
 	}
 
 	const { user } = user_data;
-	// const { data, error: player_error } = await supabase.from("players").select().eq("id", user.id)
-
-	// if (!player_error && data.length == 1) {
-	//     goto(base + "/collections")
-	// }
 
 	return { supabase, user };
 };
