@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import ItemList from '$lib/ItemList.svelte';
-	import PurseDisplay from '$lib/PurseDisplay.svelte';
-	import { userState } from '$lib/state.svelte.js';
-	import { usedCapacity } from '$lib/utils.js';
+	import ItemList from '#lib/ItemList.svelte';
+	import PurseDisplay from '#lib/PurseDisplay.svelte';
+	import { userState } from '#lib/state.svelte.js';
+	import { usedCapacity } from '#lib/utils.js';
 
 	let { data } = $props();
 	const { collection, filledBags } = data;

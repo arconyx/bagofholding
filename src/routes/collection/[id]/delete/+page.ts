@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
-import { userState } from '$lib/state.svelte';
+import { userState } from '#lib/state.svelte.js';
 
 export const load: PageLoad = async ({ parent }) => {
 	const { collection, supabase } = await parent();

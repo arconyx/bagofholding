@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Tables } from '$lib/supabase';
+	import type { Tables } from '#lib/supabase.js';
 	import ItemBox from './ItemBox.svelte';
 
 	interface Props {

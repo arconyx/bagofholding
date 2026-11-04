@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import ItemList from '$lib/ItemList.svelte';
-	import PurseDisplay from '$lib/PurseDisplay.svelte';
-	import { usedCapacity } from '$lib/utils.js';
+	import ItemList from '#lib/ItemList.svelte';
+	import PurseDisplay from '#lib/PurseDisplay.svelte';
+	import { usedCapacity } from '#lib/utils.js';
 	const { data } = $props();
 	const { bag } = data;
 </script>

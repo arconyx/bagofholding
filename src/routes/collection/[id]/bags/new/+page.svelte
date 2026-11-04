@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Bag from '$lib/forms/Bag.svelte';
+	import Bag from '#lib/forms/Bag.svelte';
 	import { goto, invalidate } from '$app/navigation';
 	import { page } from '$app/state';
 

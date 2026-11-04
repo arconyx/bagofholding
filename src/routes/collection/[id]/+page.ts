@@ -1,8 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { PageLoad } from './$types';
 import { error } from '@sveltejs/kit';
-import type { Database } from '$lib/supabase';
-import { convertBagToFilledBag, type FilledBag } from '$lib/schema/FilledBag';
+import type { Database } from '#lib/supabase.js';
+import { convertBagToFilledBag, type FilledBag } from '#lib/schema/FilledBag.js';
 
 async function getBagItems(supabase: SupabaseClient<Database>, bag: { id: string }) {
 	const { data, error } = await supabase.from('items').select().eq('bag_id', bag.id);

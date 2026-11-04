@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { userState } from '$lib/state.svelte.js';
-	import Collection from '$lib/forms/Collection.svelte';
+	import { userState } from '#lib/state.svelte.js';
+	import Collection from '#lib/forms/Collection.svelte';
 
 	let { data } = $props();
 	const { collection, supabase } = data;

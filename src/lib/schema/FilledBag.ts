@@ -1,4 +1,4 @@
-import type { Tables } from '$lib/supabase';
+import type { Tables } from '#lib/supabase.js';
 
 export interface FilledBag extends Tables<'bags'> {
 	items: Tables<'items'>[];

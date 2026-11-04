@@ -1,8 +1,8 @@
 import { PUBLIC_SUPABASE_KEY, PUBLIC_SUPABASE_URL } from '$app/env/public';
 import { createClient } from '@supabase/supabase-js';
 import type { LayoutLoad } from './$types';
-import type { Database } from '$lib/supabase';
-import { userState } from '$lib/state.svelte';
+import type { Database } from '#lib/supabase.js';
+import { userState } from '#lib/state.svelte.js';
 
 export const prerender = true;
 
