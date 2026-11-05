@@ -23,17 +23,17 @@
 	{#each filledBags as bag}
 		<li class="mb-2">
 			<h2 class="text-lg">
-				<a href="{resolve('')}/bag/{bag.id}">{bag.name}</a>
+				<a href="{resolve('/bag/[id]', {id: bag.id})}">{bag.name}</a>
 				({usedCapacity(bag)}/{bag.capacity})
 			</h2>
 			<p class="text-md">{bag.description}</p>
 			<PurseDisplay bag={bag} prefix="Coin: " />
 			<div class="mb-4 flex gap-4 text-sm">
 				<a
-					href="{resolve('')}/bag/{bag.id}/items/new?redir={encodeURIComponent(resolve('collection/') + collection.id)}"
+					href="{resolve('/bag/[id]/items/new', {id: bag.id})}?redir={encodeURIComponent(resolve('/collection/[id]', {id: collection.id}))}"
 				>Add Item</a>
 
-				<a href="{resolve('')}/bag/{bag.id}/edit/coin">Edit Coin</a>
+				<a href="{resolve('/bag/[id]/edit/coin', {id: bag.id})}">Edit Coin</a>
 			</div>
 
 			<ItemList items={bag.items} />

@@ -14,7 +14,7 @@
 >
 	<a
 		class="block h-full w-full"
-		href="{resolve('')}/item/{item.id}"
+		href="{resolve('item/[id]', {id: item.id})}"
 	>
 		<li
 			data-item-id={item.id}

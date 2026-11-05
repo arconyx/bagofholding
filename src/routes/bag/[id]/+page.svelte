@@ -16,13 +16,13 @@
 	class="mt-8 grid grid-flow-row auto-rows-min grid-cols-auto-fill-48 gap-4 text-center"
 >
 	<a
-		href="{resolve('')}/bag/{bag.id}/items/new?redir={encodeURIComponent('../')}"
+		href="{resolve('/bag/[id]/items/new', {id: bag.id})}?redir={encodeURIComponent('../')}"
 	>Add Item</a>
 
-	<a href="{resolve('')}/bag/{bag.id}/edit/coin">Edit Coin</a>
+	<a href="{resolve('/bag/[id]/edit/coin', {id: bag.id})}">Edit Coin</a>
 
 	<a
-		href="{resolve('')}/collection/{bag.collection_id}"
+		href="{resolve('/collection/[id]', {id: bag.collection_id})}"
 	>View collection</a>
 
 	<a href="{bag.id}/edit">Edit Bag</a>
