@@ -30,11 +30,11 @@
 </script>
 
 <nav class="auto flex flex-row pb-2 pl-4 pr-4 pt-2">
-	<a href="{resolve('')}/collections" class="flex-grow">Collections</a>
+	<a href="{resolve('/collections')}" class="flex-grow">Collections</a>
 	{#if userState.user}
-		<a href="{resolve('')}/auth/logout">Logout</a>
+		<a href="{resolve('/auth/logout')}">Logout</a>
 	{:else}
-		<a href="{resolve('')}/auth/login">Login</a>
+		<a href="{resolve('/auth/login')}">Login</a>
 	{/if}
 </nav>
 

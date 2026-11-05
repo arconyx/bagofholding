@@ -8,7 +8,7 @@
 	async function signInWithDiscord() {
 		const { data, error } = await supabase.auth.signInWithOAuth({
 			provider: 'discord',
-			options: { redirectTo: `${origin}${resolve('')}/auth/callback` }
+			options: { redirectTo: `${origin}${resolve('/auth/callback')}` }
 		});
 		return;
 	}

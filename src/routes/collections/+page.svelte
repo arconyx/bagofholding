@@ -8,8 +8,8 @@
 
 <ul class="pb-4 pt-4 text-lg">
 	{#each data.collections as collection}
-		<li><a href="{resolve('')}/collection/{collection.id}">{collection.name}</a></li>
+		<li><a href="{resolve('/collection/[id]', {id: collection.id})}">{collection.name}</a></li>
 	{/each}
 </ul>
 
-<a href="{resolve('')}/collections/new">New Collection</a>
+<a href="{resolve('/collections/new')}">New Collection</a>
